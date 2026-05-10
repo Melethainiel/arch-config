@@ -26,6 +26,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 └── packages/
     ├── core.txt
     ├── desktop.txt
+    ├── gaming.txt
     ├── aur.txt
     └── dev.txt
 ```
@@ -34,8 +35,9 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 
 - `packages/core.txt` contient le socle commun de tous les PC, dont `mise`.
 - `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, polices et apps desktop de base.
+- `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
 - `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git`.
-- `packages/dev.txt` reste disponible pour de futurs outils optionnels.
+- `packages/dev.txt` contient les outils dev optionnels comme Docker.
 
 ## Lancement
 
@@ -50,6 +52,12 @@ Le script doit etre lance avec l'utilisateur normal, pas avec `root`.
 La stack retenue est `iwd + Impala`.
 
 Le script active `iwd` et desactive `NetworkManager` et `wpa_supplicant` si ces services existent, pour eviter que plusieurs gestionnaires Wi-Fi se battent entre eux.
+
+## Docker
+
+Le script installe Docker, active `docker.service` et ajoute l'utilisateur courant au groupe `docker`.
+
+La nouvelle appartenance au groupe est prise en compte apres reconnexion.
 
 ## AGS
 

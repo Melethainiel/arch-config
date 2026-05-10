@@ -8,6 +8,7 @@ DOTFILES_DIR="$ROOT_DIR/dotfiles"
 PACMAN_LISTS=(
   "$PACKAGES_DIR/core.txt"
   "$PACKAGES_DIR/desktop.txt"
+  "$PACKAGES_DIR/gaming.txt"
   "$PACKAGES_DIR/dev.txt"
 )
 
@@ -24,6 +25,51 @@ read_packages() {
   [[ -f "$file" ]] || die "missing package list: $file"
 
   sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$file"
+}
+
+gpu_vendor_detected() {
+  local vendor_id="$1"
+  local vendor_file
+
+  for vendor_file in /sys/class/drm/card*/device/vendor; do
+    [[ -f "$vendor_file" ]] || continue
+    grep -qi "^$vendor_id$" "$vendor_file" && return 0
+  done
+
+  return 1
+}
+
+gaming_gpu_packages() {
+  local packages=()
+
+  if gpu_vendor_detected 0x8086; then
+    packages+=(vulkan-intel lib32-vulkan-intel)
+  fi
+
+  if gpu_vendor_detected 0x1002 || gpu_vendor_detected 0x1022; then
+    packages+=(vulkan-radeon lib32-vulkan-radeon)
+  fi
+
+  if [[ "${#packages[@]}" -gt 0 ]]; then
+    printf '%s\n' "${packages[@]}"
+  fi
+}
+
+ensure_multilib() {
+  if grep -q '^\[multilib\]' /etc/pacman.conf; then
+    return
+  fi
+
+  if grep -q '^#\[multilib\]' /etc/pacman.conf; then
+    sudo sed -i '/^#\[multilib\]/{s/^#//;n;s/^#//;}' /etc/pacman.conf
+    return
+  fi
+
+  sudo tee -a /etc/pacman.conf >/dev/null <<'EOF'
+
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+EOF
 }
 
 require_arch() {
@@ -43,6 +89,10 @@ install_pacman_packages() {
       packages+=("$package")
     done < <(read_packages "$file")
   done
+
+  while IFS= read -r package; do
+    packages+=("$package")
+  done < <(gaming_gpu_packages)
 
   if [[ "${#packages[@]}" -gt 0 ]]; then
     sudo pacman -Syu --needed --noconfirm "${packages[@]}"
@@ -81,6 +131,11 @@ configure_network() {
   # Keep one Wi-Fi backend. These commands are tolerant when units are absent.
   sudo systemctl disable --now NetworkManager.service 2>/dev/null || true
   sudo systemctl disable --now wpa_supplicant.service 2>/dev/null || true
+}
+
+configure_docker() {
+  sudo systemctl enable --now docker.service
+  sudo usermod -aG docker "$USER"
 }
 
 should_overwrite_applied_theme() {
@@ -257,10 +312,12 @@ main() {
   require_arch
   require_user
 
+  ensure_multilib
   install_pacman_packages
   install_yay
   install_aur_packages
   configure_network
+  configure_docker
   install_dotfiles
   enable_user_services
   restart_session_components
