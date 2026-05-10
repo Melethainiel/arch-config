@@ -85,7 +85,7 @@ Apres installation, lancer :
 theme-switch /chemin/vers/wallpaper.jpg
 ```
 
-Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, applique le wallpaper via `hyprpaper` si possible, puis recharge les composants de session.
+Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, ecrit aussi `~/.config/hypr/hyprpaper.conf` pour que le wallpaper persiste au reboot, tente de le synchroniser avec le theme Pixie de SDDM, puis recharge les composants de session.
 
 ## Shell
 

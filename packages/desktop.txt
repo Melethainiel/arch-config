@@ -1,5 +1,7 @@
 hyprland
 hyprpolkitagent
+hypridle
+hyprlock
 hyprpaper
 matugen
 xdg-desktop-portal
@@ -30,3 +32,4 @@ ttf-jetbrains-mono-nerd
 noto-fonts
 noto-fonts-emoji
 otf-font-awesome
+sddm

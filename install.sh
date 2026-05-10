@@ -208,9 +208,21 @@ install_dotfiles() {
     fi
   fi
 
-  if [[ -f "$ROOT_DIR/scripts/theme-switch" ]]; then
-    install -Dm755 "$ROOT_DIR/scripts/theme-switch" "$HOME/.local/bin/theme-switch"
+  if [[ -d "$DOTFILES_DIR/sddm" ]]; then
+    sudo mkdir -p /etc/sddm.conf.d
+    sudo cp -R "$DOTFILES_DIR/sddm/sddm.conf" /etc/sddm.conf.d/sddm.conf
+    sudo systemctl enable --now sddm
   fi
+}
+
+enable_user_services() {
+  local services=(
+    hyprpolkitagent.service
+    hypridle.service
+    hyprpaper.service
+  )
+
+  systemctl --user enable --now "${services[@]}"
 }
 
 restart_session_components() {
@@ -250,6 +262,7 @@ main() {
   install_aur_packages
   configure_network
   install_dotfiles
+  enable_user_services
   restart_session_components
 
   printf '\nInstall complete. Reboot or restart Hyprland after validating services and dotfiles.\n'
