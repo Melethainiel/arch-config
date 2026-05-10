@@ -270,6 +270,15 @@ install_dotfiles() {
   fi
 }
 
+install_scripts() {
+  local script
+
+  for script in "$ROOT_DIR"/scripts/*; do
+    [[ -f "$script" ]] || continue
+    install -Dm755 "$script" "$HOME/.local/bin/$(basename "$script")"
+  done
+}
+
 enable_user_services() {
   local services=(
     hyprpolkitagent.service
@@ -319,6 +328,7 @@ main() {
   configure_network
   configure_docker
   install_dotfiles
+  install_scripts
   enable_user_services
   restart_session_components
 

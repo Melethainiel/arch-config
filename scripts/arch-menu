@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+choice="$(printf '%s\n' \
+  '  Lock' \
+  '  Suspend' \
+  '󰍃  Logout' \
+  '  Reboot' \
+  '  Shutdown' \
+  | fuzzel --dmenu --prompt='System > ')"
+
+case "$choice" in
+  *Lock)
+    pidof hyprlock >/dev/null 2>&1 || hyprlock
+    ;;
+  *Suspend)
+    if ! pidof hyprlock >/dev/null 2>&1; then
+      hyprlock >/dev/null 2>&1 &
+    fi
+    sleep 0.5
+    systemctl suspend
+    ;;
+  *Logout)
+    hyprctl dispatch exit
+    ;;
+  *Reboot)
+    systemctl reboot
+    ;;
+  *Shutdown)
+    systemctl poweroff
+    ;;
+esac

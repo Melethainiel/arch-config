@@ -22,6 +22,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 │   ├── swaync/
 │   └── inputrc
 ├── scripts/
+│   ├── arch-menu
 │   └── theme-switch
 └── packages/
     ├── core.txt
@@ -82,6 +83,12 @@ Cette commande genere `dotfiles/ags/@girs` et `dotfiles/ags/node_modules`, ignor
 ## Barre
 
 La barre active est AGS (`dotfiles/ags`). Elle est composee de bulles separees en haut : logo Arch, lecture en cours et meteo a gauche, date/heure et workspaces au centre, volume/reseau/batterie/notifications a droite.
+
+## Menu Systeme
+
+`SUPER+ALT+SPACE` ouvre `arch-menu`, un menu Fuzzel pour verrouiller, suspendre, quitter Hyprland, redemarrer ou eteindre.
+
+Les scripts de `scripts/` sont installes dans `~/.local/bin`.
 
 ## Themes
 
