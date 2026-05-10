@@ -1,32 +1,196 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-choice="$(printf '%s\n' \
-  '  Lock' \
-  '  Suspend' \
-  '󰍃  Logout' \
-  '  Reboot' \
-  '  Shutdown' \
-  | fuzzel --dmenu --prompt='System > ')"
+menu() {
+  local prompt="$1"
+  shift
+
+  printf '%s\n' "$@" | fuzzel --dmenu --prompt="$prompt > "
+}
+
+notify_missing() {
+  notify-send -u low "Setup" "$1 is not configured yet."
+}
+
+open_config() {
+  local file="$1"
+
+  if command -v code >/dev/null 2>&1; then
+    code "$file"
+  else
+    ghostty --class=com.mitchellh.ghostty.about -e "${EDITOR:-nano}" "$file"
+  fi
+}
+
+show_power_profile_menu() {
+  local choice
+
+  if ! command -v powerprofilesctl >/dev/null 2>&1; then
+    notify_missing "Power profiles"
+    return
+  fi
+
+  choice="$(menu "Power Profile" \
+    '󰓅  performance' \
+    '󰾅  balanced' \
+    '  power-saver')"
+
+  case "$choice" in
+    *performance) powerprofilesctl set performance ;;
+    *balanced) powerprofilesctl set balanced ;;
+    *power-saver) powerprofilesctl set power-saver ;;
+  esac
+}
+
+show_sleep_setup_menu() {
+  local choice
+
+  choice="$(menu "System Sleep" \
+    '  Edit Hypridle' \
+    '  Edit Hyprlock')"
+
+  case "$choice" in
+    *Hypridle) open_config "$HOME/.config/hypr/hypridle.conf" ;;
+    *Hyprlock) open_config "$HOME/.config/hypr/hyprlock.conf" ;;
+  esac
+}
+
+show_default_setup_menu() {
+  local choice
+
+  choice="$(menu Default \
+    '  Browser' \
+    '  Terminal' \
+    '  Editor')"
+
+  case "$choice" in
+    *Browser) notify_missing "Default browser selection" ;;
+    *Terminal) notify_missing "Default terminal selection" ;;
+    *Editor) notify_missing "Default editor selection" ;;
+  esac
+}
+
+show_config_setup_menu() {
+  local choice
+
+  choice="$(menu Config \
+    '  Hyprland' \
+    '  Hypridle' \
+    '  Hyprlock' \
+    '󰌧  Fuzzel' \
+    '󰍜  AGS' \
+    '󰎟  SwayNC' \
+    '󰊠  Ghostty' \
+    '  Fastfetch')"
+
+  case "$choice" in
+    *Hyprland) open_config "$HOME/.config/hypr/hyprland.conf" ;;
+    *Hypridle) open_config "$HOME/.config/hypr/hypridle.conf" ;;
+    *Hyprlock) open_config "$HOME/.config/hypr/hyprlock.conf" ;;
+    *Fuzzel) open_config "$HOME/.config/fuzzel/fuzzel.ini" ;;
+    *AGS) open_config "$HOME/.config/ags/app.tsx" ;;
+    *SwayNC) open_config "$HOME/.config/swaync/config.json" ;;
+    *Ghostty) open_config "$HOME/.config/ghostty/config.ghostty" ;;
+    *Fastfetch) open_config "$HOME/.config/fastfetch/config.jsonc" ;;
+  esac
+}
+
+show_security_setup_menu() {
+  local choice
+
+  choice="$(menu Security \
+    '󰈷  Fingerprint' \
+    '  Fido2')"
+
+  case "$choice" in
+    *Fingerprint) notify_missing "Fingerprint setup" ;;
+    *Fido2) notify_missing "Fido2 setup" ;;
+  esac
+}
+
+show_setup_menu() {
+  local choice
+
+  choice="$(menu Setup \
+    '  Audio' \
+    '  Wifi' \
+    '󰂯  Bluetooth' \
+    '󱐋  Power Profile' \
+    '  System Sleep' \
+    '󰍹  Monitors' \
+    '  Keybindings' \
+    '  Input' \
+    '  Defaults' \
+    '󰱔  DNS' \
+    '  Security' \
+    '  Config')"
+
+  case "$choice" in
+    *Audio) ghostty --class=com.mitchellh.ghostty.wiremix -e wiremix ;;
+    *Wifi) ghostty --class=com.mitchellh.ghostty.impala -e impala ;;
+    *Bluetooth) command -v bluetui >/dev/null 2>&1 && ghostty --class=com.mitchellh.ghostty.bluetui -e bluetui || notify_missing "Bluetooth setup" ;;
+    *Power*) show_power_profile_menu ;;
+    *System*) show_sleep_setup_menu ;;
+    *Monitors) open_config "$HOME/.config/hypr/monitors.conf" ;;
+    *Keybindings) open_config "$HOME/.config/hypr/keybindings.conf" ;;
+    *Input) open_config "$HOME/.config/hypr/input.conf" ;;
+    *Defaults) show_default_setup_menu ;;
+    *DNS) notify_missing "DNS setup" ;;
+    *Security) show_security_setup_menu ;;
+    *Config) show_config_setup_menu ;;
+  esac
+}
+
+show_system_menu() {
+  local choice
+
+  choice="$(menu System \
+    '  Lock' \
+    '  Suspend' \
+    '󰍃  Logout' \
+    '  Reboot' \
+    '  Shutdown')"
+
+  case "$choice" in
+    *Lock)
+      pidof hyprlock >/dev/null 2>&1 || hyprlock
+      ;;
+    *Suspend)
+      if ! pidof hyprlock >/dev/null 2>&1; then
+        hyprlock >/dev/null 2>&1 &
+      fi
+      sleep 0.5
+      systemctl suspend
+      ;;
+    *Logout)
+      hyprctl dispatch exit
+      ;;
+    *Reboot)
+      systemctl reboot
+      ;;
+    *Shutdown)
+      systemctl poweroff
+      ;;
+  esac
+}
+
+choice="$(menu Go \
+  '󰀻  Apps' \
+  '  About' \
+  '  Setup' \
+  '  System')"
 
 case "$choice" in
-  *Lock)
-    pidof hyprlock >/dev/null 2>&1 || hyprlock
+  *Apps)
+    fuzzel
     ;;
-  *Suspend)
-    if ! pidof hyprlock >/dev/null 2>&1; then
-      hyprlock >/dev/null 2>&1 &
-    fi
-    sleep 0.5
-    systemctl suspend
+  *About)
+    ghostty --class=com.mitchellh.ghostty.about -e bash -lc 'fastfetch; read -n 1 -s'
     ;;
-  *Logout)
-    hyprctl dispatch exit
+  *Setup)
+    show_setup_menu
     ;;
-  *Reboot)
-    systemctl reboot
-    ;;
-  *Shutdown)
-    systemctl poweroff
+  *System)
+    show_system_menu
     ;;
 esac

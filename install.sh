@@ -230,6 +230,11 @@ install_dotfiles() {
     fi
   fi
 
+  if [[ -d "$DOTFILES_DIR/fastfetch" ]]; then
+    install -d "$HOME/.config/fastfetch"
+    cp -R "$DOTFILES_DIR/fastfetch/." "$HOME/.config/fastfetch/"
+  fi
+
   if [[ -d "$DOTFILES_DIR/gtk-3.0" ]]; then
     install -d "$HOME/.config/gtk-3.0"
     if [[ "$overwrite_theme" -eq 1 ]]; then

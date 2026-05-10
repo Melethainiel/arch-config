@@ -18,6 +18,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 │   │   ├── tsconfig.json
 │   │   └── style.css
 │   ├── hypr/
+│   ├── fastfetch/
 │   ├── matugen/
 │   ├── swaync/
 │   └── inputrc
@@ -86,7 +87,7 @@ La barre active est AGS (`dotfiles/ags`). Elle est composee de bulles separees e
 
 ## Menu Systeme
 
-`SUPER+ALT+SPACE` ouvre `arch-menu`, un menu Fuzzel pour verrouiller, suspendre, quitter Hyprland, redemarrer ou eteindre.
+`SUPER+ALT+SPACE` ouvre `arch-menu`, un menu Fuzzel pour lancer les apps, afficher About via Fastfetch, acceder au setup, verrouiller, suspendre, quitter Hyprland, redemarrer ou eteindre.
 
 Les scripts de `scripts/` sont installes dans `~/.local/bin`.
 
