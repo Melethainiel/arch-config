@@ -56,21 +56,28 @@ gaming_gpu_packages() {
   fi
 }
 
-ensure_multilib() {
-  if grep -q '^\[multilib\]' /etc/pacman.conf; then
+ensure_pacman_repo() {
+  local repo="$1"
+
+  if grep -q "^\[$repo\]" /etc/pacman.conf; then
     return
   fi
 
-  if grep -q '^#\[multilib\]' /etc/pacman.conf; then
-    sudo sed -i '/^#\[multilib\]/{s/^#//;n;s/^#//;}' /etc/pacman.conf
+  if grep -q "^#\[$repo\]" /etc/pacman.conf; then
+    sudo sed -i "/^#\[$repo\]/{s/^#//;n;s/^#//;}" /etc/pacman.conf
     return
   fi
 
-  sudo tee -a /etc/pacman.conf >/dev/null <<'EOF'
+  sudo tee -a /etc/pacman.conf >/dev/null <<EOF
 
-[multilib]
+[$repo]
 Include = /etc/pacman.d/mirrorlist
 EOF
+}
+
+ensure_pacman_repos() {
+  ensure_pacman_repo extra
+  ensure_pacman_repo multilib
 }
 
 require_arch() {
@@ -339,7 +346,7 @@ main() {
   require_arch
   require_user
 
-  ensure_multilib
+  ensure_pacman_repos
   install_pacman_packages
   install_yay
   install_aur_packages
