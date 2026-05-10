@@ -12,6 +12,8 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 ├── dotfiles/
 │   ├── ags/
 │   │   ├── app.tsx
+│   │   ├── env.d.ts
+│   │   ├── tsconfig.json
 │   │   └── style.css
 │   └── inputrc
 └── packages/
@@ -53,6 +55,14 @@ aylurs-gtk-shell-git
 Ne pas installer `aur/ags`: c'est Adventure Game Studio.
 
 Waybar reste installe comme fallback tant que la barre AGS n'est pas validee sur la machine.
+
+Pour que VS Code resolve les imports AGS dans `dotfiles/ags`, lancer si besoin :
+
+```bash
+ags types --directory dotfiles/ags --update
+```
+
+Cette commande genere `dotfiles/ags/@girs` et `dotfiles/ags/node_modules`, ignores par Git.
 
 ## Barre
 
