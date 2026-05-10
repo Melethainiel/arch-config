@@ -260,7 +260,7 @@ show_config_setup_menu() {
     *Fuzzel) open_config "$HOME/.config/fuzzel/fuzzel.ini" ;;
     *AGS) open_config "$HOME/.config/ags/app.tsx" ;;
     *SwayNC) open_config "$HOME/.config/swaync/config.json" ;;
-    *Ghostty) open_config "$HOME/.config/ghostty/config.ghostty" ;;
+    *Ghostty) open_config "$HOME/.config/ghostty/config" ;;
     *Fastfetch) open_config "$HOME/.config/fastfetch/config.jsonc" ;;
   esac
 }

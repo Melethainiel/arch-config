@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES_DIR="$ROOT_DIR/packages"
 DOTFILES_DIR="$ROOT_DIR/dotfiles"
+THEMES_DIR="$ROOT_DIR/themes"
 
 PACMAN_LISTS=(
   "$PACKAGES_DIR/core.txt"
@@ -149,7 +150,7 @@ should_overwrite_applied_theme() {
   if [[ ! -f "$HOME/.config/ags/theme.css" ]] \
     && [[ ! -f "$HOME/.config/swaync/theme.css" ]] \
     && [[ ! -f "$HOME/.config/hypr/theme.conf" ]] \
-    && [[ ! -f "$HOME/.config/ghostty/theme.conf" ]] \
+    && [[ ! -f "$HOME/.config/ghostty/themes/Matugen" ]] \
     && [[ ! -f "$HOME/.config/fuzzel/fuzzel.ini" ]] \
     && [[ ! -f "$HOME/.config/gtk-3.0/gtk.css" ]] \
     && [[ ! -f "$HOME/.config/gtk-4.0/gtk.css" ]]; then
@@ -216,10 +217,10 @@ install_dotfiles() {
   if [[ -d "$DOTFILES_DIR/ghostty" ]]; then
     install -d "$HOME/.config/ghostty/themes"
     if [[ "$overwrite_theme" -eq 1 ]]; then
-      cp -R "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/.config/ghostty/"
+      cp -R "$DOTFILES_DIR/ghostty/config" "$HOME/.config/ghostty/"
       cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/themes/Matugen"
     else
-      cp -R "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/.config/ghostty/"
+      cp -R "$DOTFILES_DIR/ghostty/config" "$HOME/.config/ghostty/"
       if [[ ! -f "$HOME/.config/ghostty/themes/Matugen" ]]; then
         cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/themes/Matugen"
       fi
@@ -289,6 +290,13 @@ install_scripts() {
   done
 }
 
+install_themes() {
+  if [[ -d "$THEMES_DIR" ]]; then
+    install -d "$HOME/.config/arch-config/themes"
+    cp -R "$THEMES_DIR/." "$HOME/.config/arch-config/themes/"
+  fi
+}
+
 enable_user_services() {
   local services=(
     hyprpolkitagent.service
@@ -340,6 +348,7 @@ main() {
   configure_docker
   install_dotfiles
   install_scripts
+  install_themes
   enable_user_services
   restart_session_components
 

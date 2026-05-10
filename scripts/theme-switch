@@ -2,7 +2,22 @@
 set -euo pipefail
 
 usage() {
-  printf 'usage: theme-switch /path/to/wallpaper\n' >&2
+  printf 'usage: theme-switch /path/to/wallpaper|theme-name\n' >&2
+}
+
+theme_dir() {
+  local name="$1"
+  local script_dir
+
+  script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+  if [[ -d "$HOME/.config/arch-config/themes/$name" ]]; then
+    printf '%s\n' "$HOME/.config/arch-config/themes/$name"
+  elif [[ -d "$script_dir/../themes/$name" ]]; then
+    printf '%s\n' "$script_dir/../themes/$name"
+  else
+    return 1
+  fi
 }
 
 write_hyprpaper_config() {
@@ -13,6 +28,20 @@ write_hyprpaper_config() {
 
     printf '\nwallpaper {\n    monitor =\n    path = %s\n}\n' "$wallpaper"
   } > "$hyprpaper_config"
+}
+
+preset_wallpaper() {
+  local source_dir="$1"
+  local candidate
+
+  shopt -s nullglob
+  for candidate in "$source_dir"/*.png "$source_dir"/*.jpg "$source_dir"/*.jpeg "$source_dir"/*.webp; do
+    printf '%s\n' "$candidate"
+    shopt -u nullglob
+    return 0
+  done
+  shopt -u nullglob
+  return 1
 }
 
 sync_pixie_sddm_wallpaper() {
@@ -63,14 +92,104 @@ confirm_theme_overwrite() {
   esac
 }
 
+install_theme_dirs() {
+  install -d \
+    "$config_home/ags" \
+    "$config_home/swaync" \
+    "$config_home/hypr" \
+    "$config_home/ghostty/themes" \
+    "$config_home/fuzzel" \
+    "$config_home/gtk-3.0" \
+    "$config_home/gtk-4.0" \
+    "$config_home/Code/User" \
+    "$config_home/opencode"
+}
+
+restart_themed_components() {
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl reload >/dev/null 2>&1 || true
+  fi
+
+  if command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.interface color-scheme prefer-dark >/dev/null 2>&1 || true
+  fi
+
+  if command -v ags >/dev/null 2>&1; then
+    ags quit --instance arch-shell >/dev/null 2>&1 || true
+    pkill -x ags >/dev/null 2>&1 || true
+    sleep 1
+    ags run "$config_home/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
+  fi
+
+  if command -v swaync >/dev/null 2>&1; then
+    pkill -x swaync >/dev/null 2>&1 || true
+    swaync >/tmp/arch-config-swaync.log 2>&1 &
+  fi
+
+  pkill -SIGUSR2 ghostty >/dev/null 2>&1 || true
+  pkill -SIGUSR2 opencode >/dev/null 2>&1 || true
+}
+
+apply_theme_preset() {
+  local name="$1"
+  local source_dir="$2"
+  local preset_background
+
+  install_theme_dirs
+
+  if ! confirm_theme_overwrite; then
+    printf 'Theme unchanged.\n'
+    exit 0
+  fi
+
+  install -Dm644 "$source_dir/ags-theme.css" "$config_home/ags/theme.css"
+  install -Dm644 "$source_dir/swaync-theme.css" "$config_home/swaync/theme.css"
+  install -Dm644 "$source_dir/hyprland-theme.conf" "$config_home/hypr/theme.conf"
+  install -Dm644 "$source_dir/ghostty.conf" "$config_home/ghostty/themes/${name^}"
+  install -Dm644 "$source_dir/fuzzel.ini" "$config_home/fuzzel/fuzzel.ini"
+  install -Dm644 "$source_dir/gtk.css" "$config_home/gtk-3.0/gtk.css"
+  install -Dm644 "$source_dir/gtk.css" "$config_home/gtk-4.0/gtk.css"
+  install -Dm644 "$source_dir/vscode.json" "$config_home/Code/User/settings.json"
+  install -Dm644 "$source_dir/opencode.json" "$config_home/opencode/opencode.json"
+
+  if [[ "$name" == "nord" ]] && command -v code >/dev/null 2>&1; then
+    code --install-extension arcticicestudio.nord-visual-studio-code >/dev/null 2>&1 || true
+  fi
+
+  if [[ -f "$config_home/ghostty/config" ]]; then
+    sed -i "s|^theme = .*|theme = \"${name^}\"|" "$config_home/ghostty/config"
+  fi
+
+  if preset_background="$(preset_wallpaper "$source_dir")"; then
+    wallpaper="$(realpath "$preset_background")"
+    write_hyprpaper_config
+    sync_pixie_sddm_wallpaper
+
+    if command -v hyprctl >/dev/null 2>&1; then
+      hyprctl hyprpaper preload "$wallpaper" >/dev/null 2>&1 || true
+      hyprctl hyprpaper wallpaper ",$wallpaper" >/dev/null 2>&1 || true
+    fi
+  fi
+
+  restart_themed_components
+  printf 'Theme applied: %s\n' "$name"
+}
+
 if [[ "${1:-}" == "" ]]; then
   usage
   exit 2
 fi
 
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+if preset_dir="$(theme_dir "$1")"; then
+  apply_theme_preset "$1" "$preset_dir"
+  exit 0
+fi
+
 wallpaper="$1"
 if [[ ! -f "$wallpaper" ]]; then
-  printf 'error: wallpaper not found: %s\n' "$wallpaper" >&2
+  printf 'error: wallpaper or theme not found: %s\n' "$wallpaper" >&2
   exit 1
 fi
 
@@ -80,18 +199,9 @@ if ! command -v matugen >/dev/null 2>&1; then
 fi
 
 wallpaper="$(realpath "$wallpaper")"
-config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 matugen_config="$config_home/matugen/config.toml"
 
-install -d \
-  "$config_home/ags" \
-  "$config_home/swaync" \
-  "$config_home/hypr" \
-  "$config_home/ghostty/themes" \
-  "$config_home/fuzzel" \
-  "$config_home/gtk-3.0" \
-  "$config_home/gtk-4.0" \
-  "$config_home/Code/User"
+install_theme_dirs
 
 if [[ ! -f "$matugen_config" ]]; then
   printf 'error: matugen config not found: %s\n' "$matugen_config" >&2
@@ -106,29 +216,18 @@ fi
 
 matugen image "$wallpaper" -m dark -c "$matugen_config"
 
+if [[ -f "$config_home/ghostty/config" ]]; then
+  sed -i 's|^theme = .*|theme = "Matugen"|' "$config_home/ghostty/config"
+fi
+
 write_hyprpaper_config
 sync_pixie_sddm_wallpaper
 
 if command -v hyprctl >/dev/null 2>&1; then
   hyprctl hyprpaper preload "$wallpaper" >/dev/null 2>&1 || true
   hyprctl hyprpaper wallpaper ",$wallpaper" >/dev/null 2>&1 || true
-  hyprctl reload >/dev/null 2>&1 || true
 fi
 
-if command -v gsettings >/dev/null 2>&1; then
-  gsettings set org.gnome.desktop.interface color-scheme prefer-dark >/dev/null 2>&1 || true
-fi
-
-if command -v ags >/dev/null 2>&1; then
-  ags quit --instance arch-shell >/dev/null 2>&1 || true
-  pkill -x ags >/dev/null 2>&1 || true
-  sleep 1
-  ags run "$config_home/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
-fi
-
-if command -v swaync >/dev/null 2>&1; then
-  pkill -x swaync >/dev/null 2>&1 || true
-  swaync >/tmp/arch-config-swaync.log 2>&1 &
-fi
+restart_themed_components
 
 printf 'Theme generated from %s\n' "$wallpaper"
