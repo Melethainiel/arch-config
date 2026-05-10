@@ -15,6 +15,9 @@ fuzzel
 nautilus
 grim
 slurp
+hyprshot
+satty
+wf-recorder
 brightnessctl
 playerctl
 pamixer
@@ -27,6 +30,10 @@ libnotify
 swaync
 iwd
 impala
+wiremix
+obsidian
+bitwarden
+lazydocker
 element-desktop
 ttf-jetbrains-mono-nerd
 noto-fonts

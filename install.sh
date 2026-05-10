@@ -203,7 +203,7 @@ install_dotfiles() {
       cp -R "$DOTFILES_DIR/code-oss/." "$HOME/.config/Code"
     else
       find "$DOTFILES_DIR/code-oss" -mindepth 1 -maxdepth 1 \
-        ! -name 'User/settings.json' \
+        ! -path "$DOTFILES_DIR/code-oss/User/settings.json" \
         -exec cp -R -t "$HOME/.config/Code" {} +
     fi
   fi
