@@ -1,4 +1,5 @@
 import { createPoll } from "ags/time"
+import { run } from "../lib/run"
 
 const batteryCommand = `
 device=$(upower -e 2>/dev/null | grep '/battery_BAT' | head -n1)
@@ -93,6 +94,12 @@ fi
 `
 
 export function SystemStatus() {
+  const notifications = createPoll("0", 1000, [
+    "bash",
+    "-c",
+    "command -v swaync-client >/dev/null 2>&1 && swaync-client -c 2>/dev/null || printf 0",
+  ], (out) => out.trim() || "0")
+
   const volume = createPoll("", 1000, [
     "bash",
     "-c",
@@ -116,7 +123,12 @@ export function SystemStatus() {
       <label class="bubble volume" visible={volume((value) => value.length > 0)} label={volume((value) => ` ${value}`)} />
       <label class="bubble network" label={network((value) => `󰖩 ${value}`)} />
       <label class="bubble battery" visible={battery((value) => value.length > 0)} xalign={0} label={battery((value) => value)} />
-      <label class="bubble notifications" label="" />
+      <button class="bubble notifications" onClicked={() => run(["swaync-client", "-t", "-sw"])}>
+        <box class="notification-indicator-wrap" spacing={4}>
+          <label label="" />
+          <label class="notification-unread" visible={notifications((count) => Number(count) > 0)} label={notifications((count) => Number(count) > 9 ? "9+" : count)} />
+        </box>
+      </button>
     </box>
   )
 }

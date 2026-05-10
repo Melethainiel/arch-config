@@ -1,0 +1,50 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+  "positionX": "right",
+  "positionY": "top",
+  "control-center-positionX": "right",
+  "control-center-positionY": "top",
+  "layer": "overlay",
+  "control-center-layer": "overlay",
+  "cssPriority": "application",
+  "control-center-margin-top": 8,
+  "control-center-margin-bottom": 8,
+  "control-center-margin-right": 8,
+  "control-center-margin-left": 0,
+  "notification-2fa-action": true,
+  "notification-inline-replies": true,
+  "notification-icon-size": 56,
+  "notification-body-image-height": 120,
+  "notification-body-image-width": 240,
+  "timeout": 8,
+  "timeout-low": 4,
+  "timeout-critical": 0,
+  "widgets": [
+    "title",
+    "dnd",
+    "mpris",
+    "volume",
+    "backlight",
+    "notifications"
+  ],
+  "widget-config": {
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Tout effacer"
+    },
+    "dnd": {
+      "text": "Ne pas déranger"
+    },
+    "mpris": {
+      "image-size": 72,
+      "image-radius": 18
+    },
+    "volume": {
+      "label": "Volume"
+    },
+    "backlight": {
+      "label": "Luminosité"
+    }
+  }
+}

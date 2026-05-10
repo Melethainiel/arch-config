@@ -1,0 +1,135 @@
+* {
+  font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free", "Noto Sans", sans-serif;
+  font-size: 13px;
+}
+
+.control-center {
+  min-width: 380px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid rgba(125, 223, 255, 0.14);
+  border-radius: 30px;
+  background: linear-gradient(180deg, rgba(10, 14, 20, 0.98), rgba(8, 13, 20, 0.94));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  color: #d8e2f1;
+}
+
+.notification-row,
+.notification-background,
+.notification,
+.notification-content,
+.close-button,
+.control-center-clear-all,
+.widget-title,
+.widget-dnd,
+.widget-mpris,
+.widget-volume,
+.widget-backlight {
+  border-radius: 22px;
+}
+
+.notification-row {
+  margin: 0 0 10px;
+  outline: none;
+}
+
+.notification-background {
+  background: transparent;
+}
+
+.notification {
+  padding: 12px;
+  border: 1px solid rgba(125, 223, 255, 0.12);
+  background: linear-gradient(135deg, rgba(13, 19, 27, 0.96), rgba(8, 13, 20, 0.9));
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+}
+
+.notification.critical {
+  border-color: rgba(255, 111, 125, 0.48);
+  background: linear-gradient(135deg, rgba(33, 14, 20, 0.96), rgba(8, 13, 20, 0.92));
+}
+
+.summary {
+  color: #f1f6ff;
+  font-weight: 800;
+}
+
+.body,
+.time,
+.notification-default-action {
+  color: #aebbd0;
+}
+
+.app-name {
+  color: #8c9aae;
+  font-size: 12px;
+}
+
+.close-button {
+  min-width: 24px;
+  min-height: 24px;
+  color: #8c9aae;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.close-button:hover {
+  color: #d8e2f1;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.control-center-clear-all,
+.notification-action,
+.widget-dnd > switch,
+.widget-dnd > switch slider {
+  border-radius: 999px;
+}
+
+.control-center-clear-all,
+.notification-action {
+  padding: 6px 12px;
+  color: #061015;
+  background: linear-gradient(135deg, #33ccff, #00ff99);
+  font-weight: 800;
+}
+
+.widget-title,
+.widget-dnd,
+.widget-mpris,
+.widget-volume,
+.widget-backlight {
+  margin-bottom: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d8e2f1;
+}
+
+.widget-title > label {
+  color: #f1f6ff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.widget-dnd > label,
+.widget-volume > label,
+.widget-backlight > label {
+  color: #9ee6b8;
+  font-weight: 700;
+}
+
+scale trough {
+  min-height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+scale highlight {
+  border-radius: 999px;
+  background: linear-gradient(135deg, #33ccff, #00ff99);
+}
+
+scale slider {
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: 999px;
+  background: #f1f6ff;
+}

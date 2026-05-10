@@ -90,6 +90,11 @@ install_dotfiles() {
     ! -name '@girs' \
     ! -name 'node_modules' \
     -exec cp -R -t "$HOME/.config/ags" {} +
+
+  if [[ -d "$DOTFILES_DIR/swaync" ]]; then
+    install -d "$HOME/.config/swaync"
+    cp -R "$DOTFILES_DIR/swaync/." "$HOME/.config/swaync/"
+  fi
 }
 
 restart_session_components() {
@@ -106,6 +111,12 @@ restart_session_components() {
     ags quit --instance arch-shell >/dev/null 2>&1 || true
     sleep 1
     ags run "$HOME/.config/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
+  fi
+
+  if command -v swaync >/dev/null 2>&1; then
+    systemctl --user stop dunst.service >/dev/null 2>&1 || true
+    pkill -x swaync >/dev/null 2>&1 || true
+    swaync >/tmp/arch-config-swaync.log 2>&1 &
   fi
 
   if command -v hyprctl >/dev/null 2>&1; then

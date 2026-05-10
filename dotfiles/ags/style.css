@@ -95,8 +95,23 @@
 
 .notifications {
   min-width: 34px;
-  padding: 0;
+  padding: 0 10px;
   color: #ffd27d;
+}
+
+.notification-indicator-wrap {
+  background: transparent;
+}
+
+.notification-unread {
+  min-width: 15px;
+  min-height: 15px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ff6f7d;
+  color: #061015;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .workspace-bubble {

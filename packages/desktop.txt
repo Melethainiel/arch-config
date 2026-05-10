@@ -20,6 +20,8 @@ pipewire
 wireplumber
 pipewire-pulse
 upower
+libnotify
+swaync
 iwd
 impala
 element-desktop
