@@ -77,7 +77,7 @@ La barre active est AGS (`dotfiles/ags`). Elle est composee de bulles separees e
 
 ## Themes
 
-`matugen` genere les couleurs depuis un wallpaper pour AGS, SwayNC et Hyprland sans migrer Hyprland vers Lua.
+`matugen` genere les couleurs depuis un wallpaper pour AGS, SwayNC, Hyprland, Ghostty, Fuzzel, GTK et VS Code (via l'extension Material Code) sans migrer Hyprland vers Lua.
 
 Apres installation, lancer :
 
@@ -85,7 +85,7 @@ Apres installation, lancer :
 theme-switch /chemin/vers/wallpaper.jpg
 ```
 
-Le script genere `~/.config/ags/theme.css`, `~/.config/swaync/theme.css` et `~/.config/hypr/theme.conf`, applique le wallpaper via `hyprpaper` si possible, puis recharge AGS, SwayNC et Hyprland.
+Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, applique le wallpaper via `hyprpaper` si possible, puis recharge les composants de session.
 
 ## Shell
 

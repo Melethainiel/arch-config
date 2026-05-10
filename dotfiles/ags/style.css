@@ -94,24 +94,8 @@
 }
 
 .notifications {
-  min-width: 34px;
   padding: 0 10px;
   color: @arch_tertiary;
-}
-
-.notification-indicator-wrap {
-  background: transparent;
-}
-
-.notification-unread {
-  min-width: 15px;
-  min-height: 15px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: @arch_error;
-  color: @arch_on_error;
-  font-size: 10px;
-  font-weight: 800;
 }
 
 .workspace-bubble {

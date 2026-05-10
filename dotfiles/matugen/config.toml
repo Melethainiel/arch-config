@@ -14,3 +14,24 @@ output_path = '~/.config/swaync/theme.css'
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland-theme.conf'
 output_path = '~/.config/hypr/theme.conf'
+
+[templates.ghostty]
+input_path = '~/.config/matugen/templates/ghostty-theme.conf'
+output_path = '~/.config/ghostty/themes/Matugen'
+post_hook = 'pkill -SIGUSR2 ghostty'
+
+[templates.fuzzel]
+input_path = '~/.config/matugen/templates/fuzzel.ini'
+output_path = '~/.config/fuzzel/fuzzel.ini'
+
+[templates.gtk3]
+input_path = '~/.config/matugen/templates/gtk.css'
+output_path = '~/.config/gtk-3.0/gtk.css'
+
+[templates.gtk4]
+input_path = '~/.config/matugen/templates/gtk.css'
+output_path = '~/.config/gtk-4.0/gtk.css'
+
+[templates.vscode]
+input_path = '~/.config/matugen/templates/vscode.json'
+output_path = '~/.config/Code/User/settings.json'

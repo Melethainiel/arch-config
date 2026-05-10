@@ -83,27 +83,129 @@ configure_network() {
   sudo systemctl disable --now wpa_supplicant.service 2>/dev/null || true
 }
 
+should_overwrite_applied_theme() {
+  local answer
+
+  if [[ ! -f "$HOME/.config/ags/theme.css" ]] \
+    && [[ ! -f "$HOME/.config/swaync/theme.css" ]] \
+    && [[ ! -f "$HOME/.config/hypr/theme.conf" ]] \
+    && [[ ! -f "$HOME/.config/ghostty/theme.conf" ]] \
+    && [[ ! -f "$HOME/.config/fuzzel/fuzzel.ini" ]] \
+    && [[ ! -f "$HOME/.config/gtk-3.0/gtk.css" ]] \
+    && [[ ! -f "$HOME/.config/gtk-4.0/gtk.css" ]]; then
+    return 0
+  fi
+
+  read -r -p "A generated theme already exists. Overwrite it with dotfile defaults? [y/N] " answer
+
+  case "$answer" in
+    [Yy]|[Yy][Ee][Ss]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 install_dotfiles() {
+  local overwrite_theme=0
+
+  if should_overwrite_applied_theme; then
+    overwrite_theme=1
+  fi
+
   install -Dm644 "$DOTFILES_DIR/inputrc" "$HOME/.inputrc"
   install -d "$HOME/.config/ags"
-  find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
-    ! -name '@girs' \
-    ! -name 'node_modules' \
-    -exec cp -R -t "$HOME/.config/ags" {} +
+  if [[ "$overwrite_theme" -eq 1 ]]; then
+    find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
+      ! -name '@girs' \
+      ! -name 'node_modules' \
+      -exec cp -R -t "$HOME/.config/ags" {} +
+  else
+    find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
+      ! -name '@girs' \
+      ! -name 'node_modules' \
+      ! -name 'theme.css' \
+      -exec cp -R -t "$HOME/.config/ags" {} +
+  fi
 
   if [[ -d "$DOTFILES_DIR/swaync" ]]; then
     install -d "$HOME/.config/swaync"
-    cp -R "$DOTFILES_DIR/swaync/." "$HOME/.config/swaync/"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/swaync/." "$HOME/.config/swaync/"
+    else
+      find "$DOTFILES_DIR/swaync" -mindepth 1 -maxdepth 1 \
+        ! -name 'theme.css' \
+        -exec cp -R -t "$HOME/.config/swaync" {} +
+    fi
   fi
 
   if [[ -d "$DOTFILES_DIR/hypr" ]]; then
     install -d "$HOME/.config/hypr"
-    cp -R "$DOTFILES_DIR/hypr/." "$HOME/.config/hypr/"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/hypr/." "$HOME/.config/hypr/"
+    else
+      find "$DOTFILES_DIR/hypr" -mindepth 1 -maxdepth 1 \
+        ! -name 'theme.conf' \
+        -exec cp -R -t "$HOME/.config/hypr" {} +
+    fi
   fi
 
   if [[ -d "$DOTFILES_DIR/matugen" ]]; then
     install -d "$HOME/.config/matugen"
     cp -R "$DOTFILES_DIR/matugen/." "$HOME/.config/matugen/"
+  fi
+
+  if [[ -d "$DOTFILES_DIR/ghostty" ]]; then
+    install -d "$HOME/.config/ghostty/themes"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/.config/ghostty/"
+      cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/themes/Matugen"
+    else
+      cp -R "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/.config/ghostty/"
+      if [[ ! -f "$HOME/.config/ghostty/themes/Matugen" ]]; then
+        cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/themes/Matugen"
+      fi
+    fi
+  fi
+
+  if [[ -d "$DOTFILES_DIR/fuzzel" ]]; then
+    install -d "$HOME/.config/fuzzel"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/fuzzel/." "$HOME/.config/fuzzel/"
+    elif [[ ! -f "$HOME/.config/fuzzel/fuzzel.ini" ]]; then
+      cp -R "$DOTFILES_DIR/fuzzel/." "$HOME/.config/fuzzel/"
+    fi
+  fi
+
+  if [[ -d "$DOTFILES_DIR/gtk-3.0" ]]; then
+    install -d "$HOME/.config/gtk-3.0"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/gtk-3.0/." "$HOME/.config/gtk-3.0/"
+    else
+      find "$DOTFILES_DIR/gtk-3.0" -mindepth 1 -maxdepth 1 \
+        ! -name 'gtk.css' \
+        -exec cp -R -t "$HOME/.config/gtk-3.0" {} +
+    fi
+  fi
+
+  if [[ -d "$DOTFILES_DIR/gtk-4.0" ]]; then
+    install -d "$HOME/.config/gtk-4.0"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/gtk-4.0/." "$HOME/.config/gtk-4.0/"
+    else
+      find "$DOTFILES_DIR/gtk-4.0" -mindepth 1 -maxdepth 1 \
+        ! -name 'gtk.css' \
+        -exec cp -R -t "$HOME/.config/gtk-4.0" {} +
+    fi
+  fi
+
+  if [[ -d "$DOTFILES_DIR/code-oss" ]]; then
+    install -d "$HOME/.config/Code"
+    if [[ "$overwrite_theme" -eq 1 ]]; then
+      cp -R "$DOTFILES_DIR/code-oss/." "$HOME/.config/Code"
+    else
+      find "$DOTFILES_DIR/code-oss" -mindepth 1 -maxdepth 1 \
+        ! -name 'User/settings.json' \
+        -exec cp -R -t "$HOME/.config/Code" {} +
+    fi
   fi
 
   if [[ -f "$ROOT_DIR/scripts/theme-switch" ]]; then

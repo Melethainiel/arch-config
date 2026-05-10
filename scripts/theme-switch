@@ -5,6 +5,28 @@ usage() {
   printf 'usage: theme-switch /path/to/wallpaper\n' >&2
 }
 
+confirm_theme_overwrite() {
+  local answer
+
+  if [[ ! -f "$config_home/ags/theme.css" ]] \
+    && [[ ! -f "$config_home/swaync/theme.css" ]] \
+    && [[ ! -f "$config_home/hypr/theme.conf" ]] \
+    && [[ ! -f "$config_home/ghostty/themes/Matugen" ]] \
+    && [[ ! -f "$config_home/fuzzel/fuzzel.ini" ]] \
+    && [[ ! -f "$config_home/gtk-3.0/gtk.css" ]] \
+    && [[ ! -f "$config_home/gtk-4.0/gtk.css" ]] \
+    && [[ ! -f "$config_home/Code/User/settings.json" ]]; then
+    return 0
+  fi
+
+  read -r -p "A theme is already applied. Replace it? [y/N] " answer
+
+  case "$answer" in
+    [Yy]|[Yy][Ee][Ss]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 if [[ "${1:-}" == "" ]]; then
   usage
   exit 2
@@ -25,12 +47,25 @@ wallpaper="$(realpath "$wallpaper")"
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 matugen_config="$config_home/matugen/config.toml"
 
-install -d "$config_home/ags" "$config_home/swaync" "$config_home/hypr"
+install -d \
+  "$config_home/ags" \
+  "$config_home/swaync" \
+  "$config_home/hypr" \
+  "$config_home/ghostty/themes" \
+  "$config_home/fuzzel" \
+  "$config_home/gtk-3.0" \
+  "$config_home/gtk-4.0" \
+  "$config_home/Code/User"
 
 if [[ ! -f "$matugen_config" ]]; then
   printf 'error: matugen config not found: %s\n' "$matugen_config" >&2
   printf 'run ./install.sh first to install dotfiles/matugen into ~/.config/matugen\n' >&2
   exit 1
+fi
+
+if ! confirm_theme_overwrite; then
+  printf 'Theme unchanged.\n'
+  exit 0
 fi
 
 matugen image "$wallpaper" -m dark -c "$matugen_config"
@@ -42,6 +77,10 @@ if command -v hyprctl >/dev/null 2>&1; then
   hyprctl hyprpaper preload "$wallpaper" >/dev/null 2>&1 || true
   hyprctl hyprpaper wallpaper ",$wallpaper" >/dev/null 2>&1 || true
   hyprctl reload >/dev/null 2>&1 || true
+fi
+
+if command -v gsettings >/dev/null 2>&1; then
+  gsettings set org.gnome.desktop.interface color-scheme prefer-dark >/dev/null 2>&1 || true
 fi
 
 if command -v ags >/dev/null 2>&1; then

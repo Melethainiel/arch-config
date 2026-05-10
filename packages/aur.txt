@@ -1,2 +1,3 @@
 aylurs-gtk-shell-git
 brave-bin
+visual-studio-code-bin

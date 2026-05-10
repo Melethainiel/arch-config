@@ -124,10 +124,7 @@ export function SystemStatus() {
       <label class="bubble network" label={network((value) => `󰖩 ${value}`)} />
       <label class="bubble battery" visible={battery((value) => value.length > 0)} xalign={0} label={battery((value) => value)} />
       <button class="bubble notifications" onClicked={() => run(["swaync-client", "-t", "-sw"])}>
-        <box class="notification-indicator-wrap" spacing={4}>
-          <label label="" />
-          <label class="notification-unread" visible={notifications((count) => Number(count) > 0)} label="" />
-        </box>
+        <label label={notifications((count) => Number(count) > 0 ? "󱅫" : "")} />
       </button>
     </box>
   )

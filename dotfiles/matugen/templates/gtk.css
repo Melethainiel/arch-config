@@ -1,0 +1,7 @@
+@define-color theme_bg_color {{ colors.surface.dark.hex }};
+@define-color theme_fg_color {{ colors.on_surface.dark.hex }};
+@define-color theme_selected_bg_color {{ colors.primary.dark.hex }};
+@define-color theme_selected_fg_color {{ colors.on_primary.dark.hex }};
+@define-color accent_color {{ colors.primary.dark.hex }};
+@define-color accent_bg_color {{ colors.primary.dark.hex }};
+@define-color accent_fg_color {{ colors.on_primary.dark.hex }};
