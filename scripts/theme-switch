@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf 'usage: theme-switch /path/to/wallpaper\n' >&2
+}
+
+if [[ "${1:-}" == "" ]]; then
+  usage
+  exit 2
+fi
+
+wallpaper="$1"
+if [[ ! -f "$wallpaper" ]]; then
+  printf 'error: wallpaper not found: %s\n' "$wallpaper" >&2
+  exit 1
+fi
+
+if ! command -v matugen >/dev/null 2>&1; then
+  printf 'error: matugen is not installed\n' >&2
+  exit 1
+fi
+
+wallpaper="$(realpath "$wallpaper")"
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+matugen_config="$config_home/matugen/config.toml"
+
+install -d "$config_home/ags" "$config_home/swaync" "$config_home/hypr"
+
+if [[ ! -f "$matugen_config" ]]; then
+  printf 'error: matugen config not found: %s\n' "$matugen_config" >&2
+  printf 'run ./install.sh first to install dotfiles/matugen into ~/.config/matugen\n' >&2
+  exit 1
+fi
+
+matugen image "$wallpaper" -m dark -c "$matugen_config"
+
+install -d "$config_home/hyprpaper"
+printf '%s\n' "$wallpaper" > "$config_home/hyprpaper/current-wallpaper"
+
+if command -v hyprctl >/dev/null 2>&1; then
+  hyprctl hyprpaper preload "$wallpaper" >/dev/null 2>&1 || true
+  hyprctl hyprpaper wallpaper ",$wallpaper" >/dev/null 2>&1 || true
+  hyprctl reload >/dev/null 2>&1 || true
+fi
+
+if command -v ags >/dev/null 2>&1; then
+  ags quit --instance arch-shell >/dev/null 2>&1 || true
+  pkill -x ags >/dev/null 2>&1 || true
+  sleep 1
+  ags run "$config_home/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
+fi
+
+if command -v swaync >/dev/null 2>&1; then
+  pkill -x swaync >/dev/null 2>&1 || true
+  swaync >/tmp/arch-config-swaync.log 2>&1 &
+fi
+
+printf 'Theme generated from %s\n' "$wallpaper"

@@ -1,6 +1,7 @@
 hyprland
 hyprpolkitagent
 hyprpaper
+matugen
 xdg-desktop-portal
 xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk

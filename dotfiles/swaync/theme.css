@@ -1,0 +1,16 @@
+@define-color swaync_bg rgba(10, 14, 20, 0.98);
+@define-color swaync_bg_alt rgba(8, 13, 20, 0.94);
+@define-color swaync_card rgba(13, 19, 27, 0.96);
+@define-color swaync_surface rgba(255, 255, 255, 0.05);
+@define-color swaync_surface_hover rgba(255, 255, 255, 0.12);
+@define-color swaync_border rgba(125, 223, 255, 0.14);
+@define-color swaync_shadow rgba(0, 0, 0, 0.50);
+@define-color swaync_text #d8e2f1;
+@define-color swaync_text_strong #f1f6ff;
+@define-color swaync_text_dim #aebbd0;
+@define-color swaync_muted #8c9aae;
+@define-color swaync_primary #33ccff;
+@define-color swaync_on_primary #061015;
+@define-color swaync_secondary #00ff99;
+@define-color swaync_error rgba(255, 111, 125, 0.48);
+@define-color swaync_error_bg rgba(33, 14, 20, 0.96);

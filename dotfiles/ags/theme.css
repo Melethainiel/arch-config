@@ -1,0 +1,13 @@
+@define-color arch_bg rgba(10, 14, 20, 0.86);
+@define-color arch_surface rgba(20, 42, 48, 0.95);
+@define-color arch_surface_dim rgba(255, 255, 255, 0.05);
+@define-color arch_surface_hover rgba(255, 255, 255, 0.10);
+@define-color arch_text #d8e2f1;
+@define-color arch_text_strong #f1f6ff;
+@define-color arch_muted #8c9aae;
+@define-color arch_primary #33ccff;
+@define-color arch_on_primary #061015;
+@define-color arch_secondary #00ff99;
+@define-color arch_tertiary #ffd27d;
+@define-color arch_error #ff6f7d;
+@define-color arch_on_error #061015;

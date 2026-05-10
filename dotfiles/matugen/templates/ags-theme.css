@@ -1,0 +1,13 @@
+@define-color arch_bg rgba({{ colors.surface.dark.red }}, {{ colors.surface.dark.green }}, {{ colors.surface.dark.blue }}, 0.86);
+@define-color arch_surface rgba({{ colors.surface_container.dark.red }}, {{ colors.surface_container.dark.green }}, {{ colors.surface_container.dark.blue }}, 0.95);
+@define-color arch_surface_dim rgba({{ colors.on_surface.dark.red }}, {{ colors.on_surface.dark.green }}, {{ colors.on_surface.dark.blue }}, 0.05);
+@define-color arch_surface_hover rgba({{ colors.on_surface.dark.red }}, {{ colors.on_surface.dark.green }}, {{ colors.on_surface.dark.blue }}, 0.10);
+@define-color arch_text {{ colors.on_surface.dark.hex }};
+@define-color arch_text_strong {{ colors.on_background.dark.hex }};
+@define-color arch_muted {{ colors.outline.dark.hex }};
+@define-color arch_primary {{ colors.primary.dark.hex }};
+@define-color arch_on_primary {{ colors.on_primary.dark.hex }};
+@define-color arch_secondary {{ colors.secondary.dark.hex }};
+@define-color arch_tertiary {{ colors.tertiary.dark.hex }};
+@define-color arch_error {{ colors.error.dark.hex }};
+@define-color arch_on_error {{ colors.on_error.dark.hex }};

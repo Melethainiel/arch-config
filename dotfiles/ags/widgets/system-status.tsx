@@ -126,7 +126,7 @@ export function SystemStatus() {
       <button class="bubble notifications" onClicked={() => run(["swaync-client", "-t", "-sw"])}>
         <box class="notification-indicator-wrap" spacing={4}>
           <label label="" />
-          <label class="notification-unread" visible={notifications((count) => Number(count) > 0)} label={notifications((count) => Number(count) > 9 ? "9+" : count)} />
+          <label class="notification-unread" visible={notifications((count) => Number(count) > 0)} label="" />
         </box>
       </button>
     </box>

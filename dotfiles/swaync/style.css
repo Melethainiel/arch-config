@@ -1,3 +1,5 @@
+@import url("theme.css");
+
 * {
   font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free", "Noto Sans", sans-serif;
   font-size: 13px;
@@ -7,11 +9,11 @@
   min-width: 380px;
   margin: 0;
   padding: 14px;
-  border: 1px solid rgba(125, 223, 255, 0.14);
+  border: 1px solid @swaync_border;
   border-radius: 30px;
-  background: linear-gradient(180deg, rgba(10, 14, 20, 0.98), rgba(8, 13, 20, 0.94));
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
-  color: #d8e2f1;
+  background: linear-gradient(180deg, @swaync_bg, @swaync_bg_alt);
+  box-shadow: 0 24px 70px @swaync_shadow;
+  color: @swaync_text;
 }
 
 .notification-row,
@@ -39,42 +41,42 @@
 
 .notification {
   padding: 12px;
-  border: 1px solid rgba(125, 223, 255, 0.12);
-  background: linear-gradient(135deg, rgba(13, 19, 27, 0.96), rgba(8, 13, 20, 0.9));
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+  border: 1px solid @swaync_border;
+  background: linear-gradient(135deg, @swaync_card, @swaync_bg_alt);
+  box-shadow: 0 18px 44px @swaync_shadow;
 }
 
 .notification.critical {
-  border-color: rgba(255, 111, 125, 0.48);
-  background: linear-gradient(135deg, rgba(33, 14, 20, 0.96), rgba(8, 13, 20, 0.92));
+  border-color: @swaync_error;
+  background: linear-gradient(135deg, @swaync_error_bg, @swaync_bg_alt);
 }
 
 .summary {
-  color: #f1f6ff;
+  color: @swaync_text_strong;
   font-weight: 800;
 }
 
 .body,
 .time,
 .notification-default-action {
-  color: #aebbd0;
+  color: @swaync_text_dim;
 }
 
 .app-name {
-  color: #8c9aae;
+  color: @swaync_muted;
   font-size: 12px;
 }
 
 .close-button {
   min-width: 24px;
   min-height: 24px;
-  color: #8c9aae;
-  background: rgba(255, 255, 255, 0.05);
+  color: @swaync_muted;
+  background: @swaync_surface;
 }
 
 .close-button:hover {
-  color: #d8e2f1;
-  background: rgba(255, 255, 255, 0.12);
+  color: @swaync_text;
+  background: @swaync_surface_hover;
 }
 
 .control-center-clear-all,
@@ -87,8 +89,8 @@
 .control-center-clear-all,
 .notification-action {
   padding: 6px 12px;
-  color: #061015;
-  background: linear-gradient(135deg, #33ccff, #00ff99);
+  color: @swaync_on_primary;
+  background: linear-gradient(135deg, @swaync_primary, @swaync_secondary);
   font-weight: 800;
 }
 
@@ -99,12 +101,12 @@
 .widget-backlight {
   margin-bottom: 10px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #d8e2f1;
+  background: @swaync_surface;
+  color: @swaync_text;
 }
 
 .widget-title > label {
-  color: #f1f6ff;
+  color: @swaync_text_strong;
   font-size: 18px;
   font-weight: 800;
 }
@@ -112,24 +114,24 @@
 .widget-dnd > label,
 .widget-volume > label,
 .widget-backlight > label {
-  color: #9ee6b8;
+  color: @swaync_secondary;
   font-weight: 700;
 }
 
 scale trough {
   min-height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: @swaync_surface_hover;
 }
 
 scale highlight {
   border-radius: 999px;
-  background: linear-gradient(135deg, #33ccff, #00ff99);
+  background: linear-gradient(135deg, @swaync_primary, @swaync_secondary);
 }
 
 scale slider {
   min-width: 16px;
   min-height: 16px;
   border-radius: 999px;
-  background: #f1f6ff;
+  background: @swaync_text_strong;
 }

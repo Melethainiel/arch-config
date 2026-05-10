@@ -1,0 +1,16 @@
+@define-color swaync_bg rgba({{ colors.surface.dark.red }}, {{ colors.surface.dark.green }}, {{ colors.surface.dark.blue }}, 0.98);
+@define-color swaync_bg_alt rgba({{ colors.background.dark.red }}, {{ colors.background.dark.green }}, {{ colors.background.dark.blue }}, 0.94);
+@define-color swaync_card rgba({{ colors.surface_container.dark.red }}, {{ colors.surface_container.dark.green }}, {{ colors.surface_container.dark.blue }}, 0.96);
+@define-color swaync_surface rgba({{ colors.on_surface.dark.red }}, {{ colors.on_surface.dark.green }}, {{ colors.on_surface.dark.blue }}, 0.05);
+@define-color swaync_surface_hover rgba({{ colors.on_surface.dark.red }}, {{ colors.on_surface.dark.green }}, {{ colors.on_surface.dark.blue }}, 0.12);
+@define-color swaync_border rgba({{ colors.primary.dark.red }}, {{ colors.primary.dark.green }}, {{ colors.primary.dark.blue }}, 0.14);
+@define-color swaync_shadow rgba(0, 0, 0, 0.50);
+@define-color swaync_text {{ colors.on_surface.dark.hex }};
+@define-color swaync_text_strong {{ colors.on_background.dark.hex }};
+@define-color swaync_text_dim {{ colors.on_surface_variant.dark.hex }};
+@define-color swaync_muted {{ colors.outline.dark.hex }};
+@define-color swaync_primary {{ colors.primary.dark.hex }};
+@define-color swaync_on_primary {{ colors.on_primary.dark.hex }};
+@define-color swaync_secondary {{ colors.secondary.dark.hex }};
+@define-color swaync_error rgba({{ colors.error.dark.red }}, {{ colors.error.dark.green }}, {{ colors.error.dark.blue }}, 0.48);
+@define-color swaync_error_bg rgba({{ colors.error_container.dark.red }}, {{ colors.error_container.dark.green }}, {{ colors.error_container.dark.blue }}, 0.48);

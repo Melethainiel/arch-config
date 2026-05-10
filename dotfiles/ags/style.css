@@ -11,7 +11,7 @@
 .bar {
   margin: 8px 12px 0;
   background: transparent;
-  color: #d8e2f1;
+  color: @arch_text;
 }
 
 .left,
@@ -26,8 +26,8 @@
   min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  background-color: rgba(10, 14, 20, 0.86);
-  color: #d8e2f1;
+  background-color: @arch_bg;
+  color: @arch_text;
 }
 
 .brand {
@@ -35,14 +35,14 @@
   min-height: 34px;
   padding: 0;
   border-radius: 999px;
-  background-color: rgba(20, 42, 48, 0.95);
-  color: #7ddfff;
+  background-color: @arch_surface;
+  color: @arch_primary;
 }
 
 .brand-icon {
   min-width: 58px;
   margin-left: -3px;
-  color: #7ddfff;
+  color: @arch_primary;
   font-weight: 700;
   font-size: 19px;
 }
@@ -52,24 +52,24 @@
   min-height: 34px;
   padding: 0 10px;
   border-radius: 999px;
-  color: #d8e2f1;
+  color: @arch_text;
 }
 
 .media-content {
   background: transparent;
-  color: #d8e2f1;
+  color: @arch_text;
 }
 
 .media-title {
   min-width: 218px;
-  color: #d8e2f1;
+  color: @arch_text;
 }
 
 .weather {
   min-width: 74px;
   min-height: 34px;
   border-radius: 999px;
-  color: #9ee6b8;
+  color: @arch_secondary;
 }
 
 .volume,
@@ -81,22 +81,22 @@
 }
 
 .volume {
-  color: #7ddfff;
+  color: @arch_primary;
 }
 
 .network {
-  color: #9ee6b8;
+  color: @arch_secondary;
 }
 
 .battery {
-  color: #d8e2f1;
-  background: rgba(10, 14, 20, 0.86);
+  color: @arch_text;
+  background: @arch_bg;
 }
 
 .notifications {
   min-width: 34px;
   padding: 0 10px;
-  color: #ffd27d;
+  color: @arch_tertiary;
 }
 
 .notification-indicator-wrap {
@@ -108,8 +108,8 @@
   min-height: 15px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #ff6f7d;
-  color: #061015;
+  background: @arch_error;
+  color: @arch_on_error;
   font-size: 10px;
   font-weight: 800;
 }
@@ -132,18 +132,18 @@
   margin-top: 7px;
   margin-bottom: 7px;
   border-radius: 999px;
-  color: #8c9aae;
-  background: rgba(255, 255, 255, 0.05);
+  color: @arch_muted;
+  background: @arch_surface_dim;
 }
 
 .workspace:hover {
-  color: #d8e2f1;
-  background: rgba(255, 255, 255, 0.1);
+  color: @arch_text;
+  background: @arch_surface_hover;
 }
 
 .workspace.active {
-  color: #061015;
-  background: linear-gradient(135deg, #33ccff, #00ff99);
+  color: @arch_on_primary;
+  background: linear-gradient(135deg, @arch_primary, @arch_secondary);
 }
 
 .clock,
@@ -151,8 +151,8 @@
   min-height: 34px;
   padding: 0 12px;
   border-radius: 999px;
-  background-color: rgba(10, 14, 20, 0.86);
-  color: #d8e2f1;
+  background-color: @arch_bg;
+  color: @arch_text;
 }
 
 .clock {

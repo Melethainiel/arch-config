@@ -95,6 +95,20 @@ install_dotfiles() {
     install -d "$HOME/.config/swaync"
     cp -R "$DOTFILES_DIR/swaync/." "$HOME/.config/swaync/"
   fi
+
+  if [[ -d "$DOTFILES_DIR/hypr" ]]; then
+    install -d "$HOME/.config/hypr"
+    cp -R "$DOTFILES_DIR/hypr/." "$HOME/.config/hypr/"
+  fi
+
+  if [[ -d "$DOTFILES_DIR/matugen" ]]; then
+    install -d "$HOME/.config/matugen"
+    cp -R "$DOTFILES_DIR/matugen/." "$HOME/.config/matugen/"
+  fi
+
+  if [[ -f "$ROOT_DIR/scripts/theme-switch" ]]; then
+    install -Dm755 "$ROOT_DIR/scripts/theme-switch" "$HOME/.local/bin/theme-switch"
+  fi
 }
 
 restart_session_components() {
@@ -109,6 +123,7 @@ restart_session_components() {
 
   if command -v ags >/dev/null 2>&1; then
     ags quit --instance arch-shell >/dev/null 2>&1 || true
+    pkill -x ags >/dev/null 2>&1 || true
     sleep 1
     ags run "$HOME/.config/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
   fi

@@ -1,0 +1,16 @@
+[config]
+fallback_color = "#33ccff"
+prefer = "closest-to-fallback"
+contrast = 0.5
+
+[templates.ags]
+input_path = '~/.config/matugen/templates/ags-theme.css'
+output_path = '~/.config/ags/theme.css'
+
+[templates.swaync]
+input_path = '~/.config/matugen/templates/swaync-theme.css'
+output_path = '~/.config/swaync/theme.css'
+
+[templates.hyprland]
+input_path = '~/.config/matugen/templates/hyprland-theme.conf'
+output_path = '~/.config/hypr/theme.conf'

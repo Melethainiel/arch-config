@@ -17,7 +17,12 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 │   │   ├── widgets/
 │   │   ├── tsconfig.json
 │   │   └── style.css
+│   ├── hypr/
+│   ├── matugen/
+│   ├── swaync/
 │   └── inputrc
+├── scripts/
+│   └── theme-switch
 └── packages/
     ├── core.txt
     ├── desktop.txt
@@ -69,6 +74,18 @@ Cette commande genere `dotfiles/ags/@girs` et `dotfiles/ags/node_modules`, ignor
 ## Barre
 
 La barre active est AGS (`dotfiles/ags`). Elle est composee de bulles separees en haut : logo Arch, lecture en cours et meteo a gauche, date/heure et workspaces au centre, volume/reseau/batterie/notifications a droite.
+
+## Themes
+
+`matugen` genere les couleurs depuis un wallpaper pour AGS, SwayNC et Hyprland sans migrer Hyprland vers Lua.
+
+Apres installation, lancer :
+
+```bash
+theme-switch /chemin/vers/wallpaper.jpg
+```
+
+Le script genere `~/.config/ags/theme.css`, `~/.config/swaync/theme.css` et `~/.config/hypr/theme.conf`, applique le wallpaper via `hyprpaper` si possible, puis recharge AGS, SwayNC et Hyprland.
 
 ## Shell
 
