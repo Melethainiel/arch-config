@@ -1,0 +1,8 @@
+base-devel
+git
+curl
+wget
+unzip
+fastfetch
+btop
+mise

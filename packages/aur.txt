@@ -1,0 +1,2 @@
+aylurs-gtk-shell-git
+brave-bin

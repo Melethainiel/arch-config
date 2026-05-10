@@ -1,0 +1,144 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free", "Noto Sans", sans-serif;
+  font-size: 13px;
+}
+
+.bar-window {
+  background: transparent;
+}
+
+.bar {
+  margin: 8px 12px 0;
+  background: transparent;
+  color: #d8e2f1;
+}
+
+.left,
+.center,
+.right,
+.status,
+.workspaces {
+  background: transparent;
+}
+
+.bubble {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background-color: rgba(10, 14, 20, 0.86);
+  color: #d8e2f1;
+}
+
+.brand {
+  min-width: 58px;
+  min-height: 34px;
+  padding: 0;
+  border-radius: 999px;
+  background-color: rgba(20, 42, 48, 0.95);
+  color: #7ddfff;
+}
+
+.brand-icon {
+  min-width: 58px;
+  margin-left: -3px;
+  color: #7ddfff;
+  font-weight: 700;
+  font-size: 19px;
+}
+
+.media {
+  min-width: 260px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #d8e2f1;
+}
+
+.media-content {
+  background: transparent;
+  color: #d8e2f1;
+}
+
+.media-title {
+  min-width: 218px;
+  color: #d8e2f1;
+}
+
+.weather {
+  min-width: 74px;
+  min-height: 34px;
+  border-radius: 999px;
+  color: #9ee6b8;
+}
+
+.volume,
+.network,
+.battery,
+.notifications {
+  min-height: 34px;
+  border-radius: 999px;
+}
+
+.volume {
+  color: #7ddfff;
+}
+
+.network {
+  color: #9ee6b8;
+}
+
+.battery {
+  color: #d8e2f1;
+}
+
+.notifications {
+  min-width: 34px;
+  padding: 0;
+  color: #ffd27d;
+}
+
+.workspace-bubble {
+  padding: 0 8px;
+}
+
+.workspace-button {
+  min-width: 24px;
+  min-height: 34px;
+  padding: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.workspace {
+  min-width: 20px;
+  min-height: 20px;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  border-radius: 999px;
+  color: #8c9aae;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.workspace:hover {
+  color: #d8e2f1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.workspace.active {
+  color: #061015;
+  background: linear-gradient(135deg, #33ccff, #00ff99);
+}
+
+.clock,
+.pill {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background-color: rgba(10, 14, 20, 0.86);
+  color: #d8e2f1;
+}
+
+.clock {
+  font-weight: 700;
+}

@@ -1,0 +1,2 @@
+# Optional project/dev packages.
+# mise lives in core.txt because it is part of the baseline on every PC.
