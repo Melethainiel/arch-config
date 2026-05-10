@@ -13,6 +13,8 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 │   ├── ags/
 │   │   ├── app.tsx
 │   │   ├── env.d.ts
+│   │   ├── lib/
+│   │   ├── widgets/
 │   │   ├── tsconfig.json
 │   │   └── style.css
 │   └── inputrc
