@@ -133,6 +133,11 @@ configure_network() {
   sudo systemctl disable --now wpa_supplicant.service 2>/dev/null || true
 }
 
+configure_hardware_services() {
+  sudo systemctl enable --now bluetooth.service
+  sudo systemctl enable --now power-profiles-daemon.service
+}
+
 configure_docker() {
   sudo systemctl enable --now docker.service
   sudo usermod -aG docker "$USER"
@@ -331,6 +336,7 @@ main() {
   install_yay
   install_aur_packages
   configure_network
+  configure_hardware_services
   configure_docker
   install_dotfiles
   install_scripts

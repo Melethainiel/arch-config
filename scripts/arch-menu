@@ -12,14 +12,80 @@ notify_missing() {
   notify-send -u low "Setup" "$1 is not configured yet."
 }
 
+state_dir() {
+  printf '%s\n' "$HOME/.config/arch-config"
+}
+
+defaults_file() {
+  printf '%s\n' "$(state_dir)/defaults.env"
+}
+
+save_default() {
+  local key="$1"
+  local value="$2"
+  local file
+
+  file="$(defaults_file)"
+  mkdir -p "$(dirname "$file")"
+  touch "$file"
+
+  if grep -q "^$key=" "$file"; then
+    sed -i "s|^$key=.*|$key=$value|" "$file"
+  else
+    printf '%s=%s\n' "$key" "$value" >>"$file"
+  fi
+}
+
+saved_default() {
+  local key="$1"
+  local file
+
+  file="$(defaults_file)"
+  [[ -f "$file" ]] || return 1
+  grep "^$key=" "$file" | tail -n 1 | cut -d= -f2-
+}
+
+notify_done() {
+  notify-send -u low "Setup" "$1"
+}
+
+launch_tui() {
+  local class="$1"
+  shift
+
+  if ! command -v "$1" >/dev/null 2>&1; then
+    notify_missing "$1"
+    return
+  fi
+
+  ghostty --class="com.mitchellh.ghostty.$class" -e "$@"
+}
+
+present_terminal() {
+  local class="$1"
+  shift
+
+  ghostty --class="com.mitchellh.ghostty.$class" -e "$@"
+}
+
 open_config() {
   local file="$1"
+  local editor
 
   if command -v code >/dev/null 2>&1; then
     code "$file"
   else
-    ghostty --class=com.mitchellh.ghostty.about -e "${EDITOR:-nano}" "$file"
+    editor="$(saved_default EDITOR || true)"
+    present_terminal editor "${editor:-${EDITOR:-nano}}" "$file"
   fi
+}
+
+suspend_disabled_file() {
+  printf '%s\n' "$(state_dir)/suspend-disabled"
+}
+
+suspend_enabled() {
+  [[ ! -f "$(suspend_disabled_file)" ]]
 }
 
 show_power_profile_menu() {
@@ -44,29 +110,133 @@ show_power_profile_menu() {
 
 show_sleep_setup_menu() {
   local choice
+  local suspend_choice
+
+  if suspend_enabled; then
+    suspend_choice='󰒲  Disable Suspend'
+  else
+    suspend_choice='󰒲  Enable Suspend'
+  fi
 
   choice="$(menu "System Sleep" \
+    "$suspend_choice" \
     '  Edit Hypridle' \
     '  Edit Hyprlock')"
 
   case "$choice" in
+    *Disable*) mkdir -p "$(state_dir)" && touch "$(suspend_disabled_file)" && notify_done "Suspend removed from System menu" ;;
+    *Enable*) rm -f "$(suspend_disabled_file)" && notify_done "Suspend available in System menu" ;;
     *Hypridle) open_config "$HOME/.config/hypr/hypridle.conf" ;;
     *Hyprlock) open_config "$HOME/.config/hypr/hyprlock.conf" ;;
   esac
+}
+
+desktop_file_exists() {
+  [[ -f "$HOME/.local/share/applications/$1" || -f "/usr/share/applications/$1" ]]
+}
+
+set_default_browser() {
+  local desktop="$1"
+
+  if ! command -v xdg-settings >/dev/null 2>&1 || ! command -v xdg-mime >/dev/null 2>&1; then
+    notify_missing "xdg-utils"
+    return
+  fi
+
+  xdg-settings set default-web-browser "$desktop"
+  xdg-mime default "$desktop" x-scheme-handler/http
+  xdg-mime default "$desktop" x-scheme-handler/https
+  xdg-mime default "$desktop" text/html
+  notify_done "Default browser set to $desktop"
+}
+
+show_default_browser_menu() {
+  if ! desktop_file_exists brave-browser.desktop; then
+    notify_missing "brave-browser.desktop"
+    return
+  fi
+
+  set_default_browser brave-browser.desktop
+}
+
+set_default_terminal() {
+  local terminal="$1"
+  local file="$HOME/.config/hypr/programs.conf"
+
+  save_default TERMINAL "$terminal"
+
+  if [[ -f "$file" ]]; then
+    sed -i "s|^\$terminal = .*|\$terminal = $terminal|" "$file"
+    hyprctl reload >/dev/null 2>&1 || true
+  fi
+
+  notify_done "Default terminal set to $terminal"
+}
+
+show_default_terminal_menu() {
+  if ! command -v ghostty >/dev/null 2>&1; then
+    notify_missing "ghostty"
+    return
+  fi
+
+  set_default_terminal ghostty
+}
+
+set_default_editor() {
+  local editor="$1"
+  local env_file="$HOME/.config/environment.d/10-arch-config.conf"
+
+  save_default EDITOR "$editor"
+  mkdir -p "$(dirname "$env_file")"
+  printf 'EDITOR=%s\nVISUAL=%s\n' "$editor" "$editor" >"$env_file"
+  systemctl --user import-environment EDITOR VISUAL >/dev/null 2>&1 || true
+  notify_done "Default editor set to $editor"
+}
+
+show_default_editor_menu() {
+  if ! command -v code >/dev/null 2>&1; then
+    notify_missing "code"
+    return
+  fi
+
+  set_default_editor code
+}
+
+reset_all_defaults() {
+  show_default_browser_menu
+  show_default_terminal_menu
+  show_default_editor_menu
 }
 
 show_default_setup_menu() {
   local choice
 
   choice="$(menu Default \
+    '  All' \
     '  Browser' \
     '  Terminal' \
     '  Editor')"
 
   case "$choice" in
-    *Browser) notify_missing "Default browser selection" ;;
-    *Terminal) notify_missing "Default terminal selection" ;;
-    *Editor) notify_missing "Default editor selection" ;;
+    *All) reset_all_defaults ;;
+    *Browser) show_default_browser_menu ;;
+    *Terminal) show_default_terminal_menu ;;
+    *Editor) show_default_editor_menu ;;
+  esac
+}
+
+show_dns_setup_menu() {
+  local choice
+
+  choice="$(menu DNS \
+    '󰇧  Cloudflare' \
+    '󰐪  Quad9' \
+    '󰦝  DHCP')"
+
+  case "$choice" in
+    *Cloudflare*) present_terminal dns arch-setup-dns Cloudflare ;;
+    *Quad9*) present_terminal dns arch-setup-dns Quad9 ;;
+    *DHCP*) present_terminal dns arch-setup-dns DHCP ;;
   esac
 }
 
@@ -126,16 +296,16 @@ show_setup_menu() {
     '  Config')"
 
   case "$choice" in
-    *Audio) ghostty --class=com.mitchellh.ghostty.wiremix -e wiremix ;;
-    *Wifi) ghostty --class=com.mitchellh.ghostty.impala -e impala ;;
-    *Bluetooth) command -v bluetui >/dev/null 2>&1 && ghostty --class=com.mitchellh.ghostty.bluetui -e bluetui || notify_missing "Bluetooth setup" ;;
+    *Audio) launch_tui wiremix wiremix ;;
+    *Wifi) launch_tui impala impala ;;
+    *Bluetooth) launch_tui bluetui bluetui ;;
     *Power*) show_power_profile_menu ;;
     *System*) show_sleep_setup_menu ;;
     *Monitors) open_config "$HOME/.config/hypr/monitors.conf" ;;
     *Keybindings) open_config "$HOME/.config/hypr/keybindings.conf" ;;
     *Input) open_config "$HOME/.config/hypr/input.conf" ;;
     *Defaults) show_default_setup_menu ;;
-    *DNS) notify_missing "DNS setup" ;;
+    *DNS) show_dns_setup_menu ;;
     *Security) show_security_setup_menu ;;
     *Config) show_config_setup_menu ;;
   esac
@@ -143,13 +313,21 @@ show_setup_menu() {
 
 show_system_menu() {
   local choice
+  local options=(
+    '  Lock'
+  )
 
-  choice="$(menu System \
-    '  Lock' \
-    '  Suspend' \
-    '󰍃  Logout' \
-    '  Reboot' \
-    '  Shutdown')"
+  suspend_enabled && options+=(
+    '  Suspend'
+  )
+
+  options+=(
+    '󰍃  Logout'
+    '  Reboot'
+    '  Shutdown'
+  )
+
+  choice="$(menu System "${options[@]}")"
 
   case "$choice" in
     *Lock)

@@ -7,6 +7,7 @@ matugen
 xdg-desktop-portal
 xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
+xdg-utils
 waybar
 wl-clipboard
 cliphist
@@ -25,6 +26,10 @@ pavucontrol
 pipewire
 wireplumber
 pipewire-pulse
+bluez
+bluez-utils
+bluetui
+power-profiles-daemon
 upower
 libnotify
 swaync
