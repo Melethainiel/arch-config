@@ -120,8 +120,12 @@ export function SystemStatus() {
 
   return (
     <box class="status" spacing={8}>
-      <label class="bubble volume" visible={volume((value) => value.length > 0)} label={volume((value) => ` ${value}`)} />
-      <label class="bubble network" label={network((value) => `󰖩 ${value}`)} />
+      <button class="bubble volume" visible={volume((value) => value.length > 0)} onClicked={() => run(["ghostty", "--class=com.mitchellh.ghostty.wiremix", "-e", "wiremix"])}>
+        <label label={volume((value) => ` ${value}`)} />
+      </button>
+      <button class="bubble network" onClicked={() => run(["ghostty", "--class=com.mitchellh.ghostty.impala", "-e", "impala"])}>
+        <label label={network((value) => `󰖩 ${value}`)} />
+      </button>
       <label class="bubble battery" visible={battery((value) => value.length > 0)} xalign={0} label={battery((value) => value)} />
       <button class="bubble notifications" onClicked={() => run(["swaync-client", "-t", "-sw"])}>
         <label label={notifications((count) => Number(count) > 0 ? "󱅫" : "")} />
