@@ -17,7 +17,7 @@ export function Bar(monitor = 0) {
   })
 
   return (
-    <window visible name="bar" class="bar-window" monitor={monitor} anchor={TOP | LEFT | RIGHT} exclusivity={Astal.Exclusivity.EXCLUSIVE} application={app}>
+    <window visible name={`bar-${monitor}`} class="bar-window" monitor={monitor} anchor={TOP | LEFT | RIGHT} exclusivity={Astal.Exclusivity.EXCLUSIVE} application={app}>
       <centerbox class="bar">
         <box $type="start" class="left" spacing={8}>
           <box class="bubble brand">

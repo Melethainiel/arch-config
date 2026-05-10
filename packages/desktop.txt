@@ -19,6 +19,7 @@ pavucontrol
 pipewire
 wireplumber
 pipewire-pulse
+upower
 iwd
 impala
 element-desktop

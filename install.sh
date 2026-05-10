@@ -85,8 +85,32 @@ configure_network() {
 
 install_dotfiles() {
   install -Dm644 "$DOTFILES_DIR/inputrc" "$HOME/.inputrc"
-  install -Dm644 "$DOTFILES_DIR/ags/app.tsx" "$HOME/.config/ags/app.tsx"
-  install -Dm644 "$DOTFILES_DIR/ags/style.css" "$HOME/.config/ags/style.css"
+  install -d "$HOME/.config/ags"
+  find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
+    ! -name '@girs' \
+    ! -name 'node_modules' \
+    -exec cp -R -t "$HOME/.config/ags" {} +
+}
+
+restart_session_components() {
+  local answer
+
+  read -r -p "Restart AGS and reload Hyprland now? [Y/n] " answer
+
+  case "$answer" in
+    ""|[Yy]|[Yy][Ee][Ss]) ;;
+    *) return ;;
+  esac
+
+  if command -v ags >/dev/null 2>&1; then
+    ags quit --instance arch-shell >/dev/null 2>&1 || true
+    sleep 1
+    ags run "$HOME/.config/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
+  fi
+
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl reload >/dev/null 2>&1 || true
+  fi
 }
 
 main() {
@@ -98,6 +122,7 @@ main() {
   install_aur_packages
   configure_network
   install_dotfiles
+  restart_session_components
 
   printf '\nInstall complete. Reboot or restart Hyprland after validating services and dotfiles.\n'
 }
