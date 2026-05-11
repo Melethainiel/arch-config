@@ -17,8 +17,13 @@ output_path = '~/.config/hypr/theme.conf'
 
 [templates.ghostty]
 input_path = '~/.config/matugen/templates/ghostty-theme.conf'
-output_path = '~/.config/ghostty/themes/Matugen'
+output_path = '~/.config/ghostty/theme.conf'
 post_hook = 'pkill -SIGUSR2 ghostty'
+
+[templates.btop]
+input_path = '~/.config/matugen/templates/btop.theme'
+output_path = '~/.config/btop/themes/current.theme'
+post_hook = 'pkill -SIGUSR2 btop'
 
 [templates.fuzzel]
 input_path = '~/.config/matugen/templates/fuzzel.ini'

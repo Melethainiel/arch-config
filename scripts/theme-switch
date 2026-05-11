@@ -76,7 +76,9 @@ confirm_theme_overwrite() {
   if [[ ! -f "$config_home/ags/theme.css" ]] \
     && [[ ! -f "$config_home/swaync/theme.css" ]] \
     && [[ ! -f "$config_home/hypr/theme.conf" ]] \
+    && [[ ! -f "$config_home/ghostty/theme.conf" ]] \
     && [[ ! -f "$config_home/ghostty/themes/Matugen" ]] \
+    && [[ ! -f "$config_home/btop/themes/current.theme" ]] \
     && [[ ! -f "$config_home/fuzzel/fuzzel.ini" ]] \
     && [[ ! -f "$config_home/gtk-3.0/gtk.css" ]] \
     && [[ ! -f "$config_home/gtk-4.0/gtk.css" ]] \
@@ -97,12 +99,43 @@ install_theme_dirs() {
     "$config_home/ags" \
     "$config_home/swaync" \
     "$config_home/hypr" \
+    "$config_home/ghostty" \
     "$config_home/ghostty/themes" \
+    "$config_home/btop/themes" \
     "$config_home/fuzzel" \
     "$config_home/gtk-3.0" \
     "$config_home/gtk-4.0" \
     "$config_home/Code/User" \
     "$config_home/opencode"
+}
+
+ensure_btop_current_theme() {
+  local btop_config="$config_home/btop/btop.conf"
+
+  if [[ ! -f "$btop_config" ]]; then
+    return 0
+  fi
+
+  if grep -q '^color_theme = ' "$btop_config"; then
+    sed -i 's|^color_theme = .*|color_theme = "current"|' "$btop_config"
+  else
+    sed -i '1acolor_theme = "current"' "$btop_config"
+  fi
+}
+
+ensure_ghostty_theme_include() {
+  local ghostty_config="$config_home/ghostty/config"
+  local include='config-file = ?"~/.config/ghostty/theme.conf"'
+
+  if [[ ! -f "$ghostty_config" ]]; then
+    return 0
+  fi
+
+  if grep -q '^theme = ' "$ghostty_config"; then
+    sed -i "s|^theme = .*|$include|" "$ghostty_config"
+  elif ! grep -q '^config-file = ?"~/.config/ghostty/theme.conf"$' "$ghostty_config"; then
+    sed -i "1a$include" "$ghostty_config"
+  fi
 }
 
 restart_themed_components() {
@@ -127,6 +160,7 @@ restart_themed_components() {
   fi
 
   pkill -SIGUSR2 ghostty >/dev/null 2>&1 || true
+  pkill -SIGUSR2 btop >/dev/null 2>&1 || true
   pkill -SIGUSR2 opencode >/dev/null 2>&1 || true
 }
 
@@ -145,19 +179,19 @@ apply_theme_preset() {
   install -Dm644 "$source_dir/ags-theme.css" "$config_home/ags/theme.css"
   install -Dm644 "$source_dir/swaync-theme.css" "$config_home/swaync/theme.css"
   install -Dm644 "$source_dir/hyprland-theme.conf" "$config_home/hypr/theme.conf"
+  install -Dm644 "$source_dir/ghostty.conf" "$config_home/ghostty/theme.conf"
   install -Dm644 "$source_dir/ghostty.conf" "$config_home/ghostty/themes/${name^}"
+  install -Dm644 "$source_dir/btop.theme" "$config_home/btop/themes/current.theme"
   install -Dm644 "$source_dir/fuzzel.ini" "$config_home/fuzzel/fuzzel.ini"
   install -Dm644 "$source_dir/gtk.css" "$config_home/gtk-3.0/gtk.css"
   install -Dm644 "$source_dir/gtk.css" "$config_home/gtk-4.0/gtk.css"
   install -Dm644 "$source_dir/vscode.json" "$config_home/Code/User/settings.json"
   install -Dm644 "$source_dir/opencode.json" "$config_home/opencode/opencode.json"
+  ensure_btop_current_theme
+  ensure_ghostty_theme_include
 
   if [[ "$name" == "nord" ]] && command -v code >/dev/null 2>&1; then
     code --install-extension arcticicestudio.nord-visual-studio-code >/dev/null 2>&1 || true
-  fi
-
-  if [[ -f "$config_home/ghostty/config" ]]; then
-    sed -i "s|^theme = .*|theme = \"${name^}\"|" "$config_home/ghostty/config"
   fi
 
   if preset_background="$(preset_wallpaper "$source_dir")"; then
@@ -215,10 +249,8 @@ if ! confirm_theme_overwrite; then
 fi
 
 matugen image "$wallpaper" -m dark -c "$matugen_config"
-
-if [[ -f "$config_home/ghostty/config" ]]; then
-  sed -i 's|^theme = .*|theme = "Matugen"|' "$config_home/ghostty/config"
-fi
+ensure_btop_current_theme
+ensure_ghostty_theme_include
 
 write_hyprpaper_config
 sync_pixie_sddm_wallpaper

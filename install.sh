@@ -157,6 +157,7 @@ should_overwrite_applied_theme() {
   if [[ ! -f "$HOME/.config/ags/theme.css" ]] \
     && [[ ! -f "$HOME/.config/swaync/theme.css" ]] \
     && [[ ! -f "$HOME/.config/hypr/theme.conf" ]] \
+    && [[ ! -f "$HOME/.config/ghostty/theme.conf" ]] \
     && [[ ! -f "$HOME/.config/ghostty/themes/Matugen" ]] \
     && [[ ! -f "$HOME/.config/fuzzel/fuzzel.ini" ]] \
     && [[ ! -f "$HOME/.config/gtk-3.0/gtk.css" ]] \
@@ -225,9 +226,13 @@ install_dotfiles() {
     install -d "$HOME/.config/ghostty/themes"
     if [[ "$overwrite_theme" -eq 1 ]]; then
       cp -R "$DOTFILES_DIR/ghostty/config" "$HOME/.config/ghostty/"
+      cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/"
       cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/themes/Matugen"
     else
       cp -R "$DOTFILES_DIR/ghostty/config" "$HOME/.config/ghostty/"
+      if [[ ! -f "$HOME/.config/ghostty/theme.conf" ]]; then
+        cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/"
+      fi
       if [[ ! -f "$HOME/.config/ghostty/themes/Matugen" ]]; then
         cp -R "$DOTFILES_DIR/ghostty/theme.conf" "$HOME/.config/ghostty/themes/Matugen"
       fi

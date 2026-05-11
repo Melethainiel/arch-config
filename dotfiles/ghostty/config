@@ -1,5 +1,5 @@
 # Dynamic theme colors
-theme = "Matugen"
+config-file = ?"~/.config/ghostty/theme.conf"
 
 # Font
 font-family = "JetBrainsMono Nerd Font"
