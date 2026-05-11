@@ -2,15 +2,22 @@ import type { Accessor } from "ags"
 import { createPoll } from "ags/time"
 import { run } from "../lib/run"
 
-const workspaces = [1, 2, 3, 4, 5, 6]
+const workspaces = [
+  { id: 1, label: "󰖟 1" },
+  { id: 2, label: "󰊴 2" },
+  { id: 3, label: "󰆍 3" },
+  { id: 4, label: "4" },
+  { id: 5, label: "5" },
+  { id: 6, label: "6" },
+]
 
-function WorkspaceButton({ id, active }: { id: number; active: Accessor<string> }) {
+function WorkspaceButton({ id, label, active }: { id: number; label: string; active: Accessor<string> }) {
   return (
     <button
       class="workspace-button"
       onClicked={() => run(["hyprctl", "dispatch", "workspace", id.toString()])}
     >
-      <label class={active((current) => current === id.toString() ? "workspace active" : "workspace")} label={id.toString()} />
+      <label class={active((current) => current === id.toString() ? "workspace active" : "workspace")} label={label} />
     </button>
   )
 }
@@ -24,7 +31,7 @@ export function Workspaces() {
 
   return (
     <box class="workspaces" spacing={6}>
-      {workspaces.map((id) => <WorkspaceButton id={id} active={active} />)}
+      {workspaces.map((workspace) => <WorkspaceButton {...workspace} active={active} />)}
     </box>
   )
 }

@@ -124,7 +124,7 @@
 }
 
 .workspace-button {
-  min-width: 24px;
+  min-width: 34px;
   min-height: 34px;
   padding: 0;
   border-radius: 999px;
@@ -132,13 +132,14 @@
 }
 
 .workspace {
-  min-width: 20px;
+  min-width: 28px;
   min-height: 20px;
   margin-top: 7px;
   margin-bottom: 7px;
   border-radius: 999px;
   color: @arch_muted;
   background: @arch_surface_dim;
+  transition: min-width 180ms ease, background 180ms ease, color 180ms ease;
 }
 
 .workspace:hover {
@@ -147,6 +148,7 @@
 }
 
 .workspace.active {
+  min-width: 44px;
   color: @arch_on_primary;
   background: linear-gradient(135deg, @arch_primary, @arch_secondary);
 }
