@@ -40,6 +40,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 - `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
 - `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git`.
 - `packages/dev.txt` contient les outils dev optionnels comme Docker.
+- `howdy-git` est installe depuis l'AUR et le script ajoute `pam_howdy.so` a `sudo` et `hyprlock` en `sufficient`, avec fallback mot de passe via la pile PAM existante.
 
 ## Lancement
 
@@ -60,6 +61,25 @@ Le script active `iwd` et desactive `NetworkManager` et `wpa_supplicant` si ces 
 Le script installe Docker, active `docker.service` et ajoute l'utilisateur courant au groupe `docker`.
 
 La nouvelle appartenance au groupe est prise en compte apres reconnexion.
+
+## Howdy
+
+Howdy est configure dans PAM pour `sudo` et `hyprlock` uniquement. La ligne ajoutee est volontairement limitee a ces services :
+
+```pam
+auth        sufficient  pam_howdy.so
+```
+
+Si la reconnaissance echoue ou expire, PAM continue vers l'authentification classique et demande le mot de passe.
+
+La configuration camera reste a faire par machine avec :
+
+```bash
+sudo howdy config
+sudo howdy add
+```
+
+Sur le Zenbook, le flux IR teste est `/dev/v4l/by-path/pci-0000:00:14.0-usb-0:5:1.2-video-index0`.
 
 ## AGS
 

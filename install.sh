@@ -151,6 +151,32 @@ configure_docker() {
   sudo usermod -aG docker "$USER"
 }
 
+ensure_pam_howdy() {
+  local pam_file="$1"
+
+  [[ -f "$pam_file" ]] || return 0
+
+  if sudo grep -Eq '^[[:space:]]*auth[[:space:]]+sufficient[[:space:]]+pam_howdy\.so([[:space:]]|$)' "$pam_file"; then
+    return 0
+  fi
+
+  if sudo grep -q '^#%PAM-1\.0$' "$pam_file"; then
+    sudo sed -i '0,/^#%PAM-1\.0$/s//#%PAM-1.0\n\nauth        sufficient  pam_howdy.so/' "$pam_file"
+  else
+    sudo sed -i '0,/^[[:space:]]*auth[[:space:]]/s//auth        sufficient  pam_howdy.so\n&/' "$pam_file"
+  fi
+}
+
+configure_howdy() {
+  if [[ ! -e /usr/lib/security/pam_howdy.so && ! -e /lib/security/pam_howdy.so ]]; then
+    printf 'Howdy PAM module not found; skipping PAM configuration.\n'
+    return 0
+  fi
+
+  ensure_pam_howdy /etc/pam.d/sudo
+  ensure_pam_howdy /etc/pam.d/hyprlock
+}
+
 should_overwrite_applied_theme() {
   local answer
 
@@ -385,6 +411,7 @@ main() {
   configure_hardware_services
   configure_docker
   install_dotfiles
+  configure_howdy
   install_scripts
   install_themes
   configure_voxtype
