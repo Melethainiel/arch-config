@@ -265,10 +265,26 @@ show_config_setup_menu() {
   esac
 }
 
+ssh_usb_cmd_path() {
+  local cmd="$1"
+
+  if [[ -x "$HOME/.local/bin/$cmd" ]]; then
+    printf '%s\n' "$HOME/.local/bin/$cmd"
+    return 0
+  fi
+
+  if command -v "$cmd" >/dev/null 2>&1; then
+    command -v "$cmd"
+    return 0
+  fi
+
+  return 1
+}
+
 ensure_ssh_usb_cmd() {
   local cmd="$1"
 
-  if command -v "$cmd" >/dev/null 2>&1; then
+  if ssh_usb_cmd_path "$cmd" >/dev/null 2>&1; then
     return 0
   fi
 
@@ -290,6 +306,15 @@ ensure_ssh_usb_cmd() {
   fi
 }
 
+run_ssh_usb_cmd() {
+  local cmd="$1"
+  local path
+
+  ensure_ssh_usb_cmd "$cmd" || return 1
+  path="$(ssh_usb_cmd_path "$cmd")"
+  present_terminal ssh-usb "$path"
+}
+
 show_security_setup_menu() {
   local choice
 
@@ -304,13 +329,13 @@ show_security_setup_menu() {
     *Fingerprint) notify_missing "Fingerprint setup" ;;
     *Fido2) notify_missing "Fido2 setup" ;;
     *"Load SSH"*)
-      ensure_ssh_usb_cmd ssh-usb-load && present_terminal ssh-usb ssh-usb-load
+      run_ssh_usb_cmd ssh-usb-load
       ;;
     *"key status"*)
-      ensure_ssh_usb_cmd ssh-usb-status && present_terminal ssh-usb ssh-usb-status
+      run_ssh_usb_cmd ssh-usb-status
       ;;
     *"Unload SSH"*)
-      ensure_ssh_usb_cmd ssh-usb-unload && present_terminal ssh-usb ssh-usb-unload
+      run_ssh_usb_cmd ssh-usb-unload
       ;;
   esac
 }
