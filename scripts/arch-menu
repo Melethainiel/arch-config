@@ -265,16 +265,53 @@ show_config_setup_menu() {
   esac
 }
 
+ensure_ssh_usb_cmd() {
+  local cmd="$1"
+
+  if command -v "$cmd" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local installer="/run/media/$USER/SSH-VAULT/install/install-ssh-usb-workflow.sh"
+
+  if [[ -f "$installer" ]]; then
+    local run
+    run="$(menu "Install SSH USB?" '  Yes, run installer' '  Cancel')"
+    case "$run" in
+      *Yes*)
+        present_terminal ssh-usb bash "$installer"
+        return 1
+        ;;
+      *) return 1 ;;
+    esac
+  else
+    notify-send -u normal "SSH USB Vault" "Installer not found. Insert the SSH-VAULT USB drive."
+    return 1
+  fi
+}
+
 show_security_setup_menu() {
   local choice
 
   choice="$(menu Security \
     '󰈷  Fingerprint' \
-    '  Fido2')"
+    '  Fido2' \
+    '󰌆  Load SSH keys' \
+    '󰌆  SSH key status' \
+    '󰌇  Unload SSH keys')"
 
   case "$choice" in
     *Fingerprint) notify_missing "Fingerprint setup" ;;
     *Fido2) notify_missing "Fido2 setup" ;;
+    *"Load SSH"*)
+      ensure_ssh_usb_cmd ssh-usb-load && present_terminal ssh-usb ssh-usb-load
+      ;;
+    *"key status"*)
+      ensure_ssh_usb_cmd ssh-usb-status && present_terminal ssh-usb ssh-usb-status
+      ;;
+    *"Unload SSH"*)
+      ensure_ssh_usb_cmd ssh-usb-unload && present_terminal ssh-usb ssh-usb-unload
+      ;;
   esac
 }
 
