@@ -1,0 +1,26 @@
+# Voxtype is controlled by Hyprland keybindings so it does not need evdev/input permissions.
+state_file = "auto"
+
+[hotkey]
+enabled = false
+
+[audio]
+device = "default"
+sample_rate = 16000
+max_duration_secs = 60
+
+[whisper]
+model = "large-v3-turbo"
+language = "fr"
+translate = false
+on_demand_loading = true
+
+[output]
+mode = "type"
+fallback_to_clipboard = true
+type_delay_ms = 0
+
+[output.notification]
+on_recording_start = false
+on_recording_stop = false
+on_transcription = true

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+model="${VOXTYPE_MODEL:-large-v3-turbo}"
+model_file="$HOME/.local/share/voxtype/models/ggml-$model.bin"
+
+if ! command -v voxtype >/dev/null 2>&1; then
+  printf 'error: voxtype is not installed\n' >&2
+  exit 1
+fi
+
+mkdir -p "$HOME/.local/share/voxtype/models"
+
+if [[ ! -f "$model_file" ]]; then
+  printf 'Downloading Voxtype model: %s\n' "$model"
+  voxtype setup --download --model "$model"
+else
+  printf 'Voxtype model already installed: %s\n' "$model"
+fi
+
+systemctl --user enable voxtype.service >/dev/null 2>&1 || true
+systemctl --user restart voxtype.service >/dev/null 2>&1 || true
+
+if command -v notify-send >/dev/null 2>&1; then
+  notify-send "Voxtype ready" "Model $model is installed and the daemon is running." || true
+fi
+
+printf 'Voxtype is ready. Use SUPER+V to dictate.\n'

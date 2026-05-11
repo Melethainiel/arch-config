@@ -10,6 +10,7 @@ xdg-desktop-portal-gtk
 xdg-utils
 waybar
 wl-clipboard
+wtype
 cliphist
 ghostty
 fuzzel

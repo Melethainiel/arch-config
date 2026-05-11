@@ -222,6 +222,11 @@ install_dotfiles() {
     cp -R "$DOTFILES_DIR/matugen/." "$HOME/.config/matugen/"
   fi
 
+  if [[ -d "$DOTFILES_DIR/voxtype" ]]; then
+    install -d "$HOME/.config/voxtype"
+    cp -R "$DOTFILES_DIR/voxtype/." "$HOME/.config/voxtype/"
+  fi
+
   if [[ -d "$DOTFILES_DIR/ghostty" ]]; then
     install -d "$HOME/.config/ghostty/themes"
     if [[ "$overwrite_theme" -eq 1 ]]; then
@@ -309,6 +314,27 @@ install_themes() {
   fi
 }
 
+configure_voxtype() {
+  local answer
+
+  command -v voxtype >/dev/null 2>&1 || return 0
+
+  systemctl --user enable voxtype.service >/dev/null 2>&1 || true
+  systemctl --user restart voxtype.service >/dev/null 2>&1 || true
+
+  if [[ ! -t 0 ]]; then
+    printf 'Voxtype installed. Run arch-setup-voxtype later to download the speech model.\n'
+    return 0
+  fi
+
+  read -r -p "Download Voxtype speech model now? [Y/n] " answer || answer=n
+
+  case "$answer" in
+    ""|[Yy]|[Yy][Ee][Ss]) "$HOME/.local/bin/arch-setup-voxtype" ;;
+    *) printf 'Skipped Voxtype model download. Run arch-setup-voxtype later.\n' ;;
+  esac
+}
+
 enable_user_services() {
   local services=(
     hyprpolkitagent.service
@@ -361,6 +387,7 @@ main() {
   install_dotfiles
   install_scripts
   install_themes
+  configure_voxtype
   enable_user_services
   restart_session_components
 

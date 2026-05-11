@@ -3,6 +3,7 @@ import { Astal } from "ags/gtk4"
 import { createPoll } from "ags/time"
 import { NowPlaying } from "./now-playing"
 import { SystemStatus } from "./system-status"
+import { Voxtype } from "./voxtype"
 import { Weather } from "./weather"
 import { Workspaces } from "./workspaces"
 
@@ -23,6 +24,7 @@ export function Bar(monitor = 0) {
           <box class="bubble brand">
             <label class="brand-icon" label="" />
           </box>
+          <Voxtype />
           <NowPlaying />
           <Weather />
         </box>

@@ -72,6 +72,27 @@
   color: @arch_secondary;
 }
 
+.voxtype {
+  min-height: 34px;
+  color: @arch_primary;
+}
+
+.voxtype.recording,
+.voxtype.record {
+  color: @arch_on_primary;
+  background: linear-gradient(135deg, @arch_primary, @arch_secondary);
+}
+
+.voxtype.transcribing {
+  color: @arch_tertiary;
+}
+
+.voxtype.missing,
+.voxtype.setup,
+.voxtype.stopped {
+  color: @arch_muted;
+}
+
 .volume,
 .network,
 .battery,
