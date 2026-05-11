@@ -2,3 +2,4 @@ aylurs-gtk-shell-git
 brave-bin
 pixie-sddm-git
 visual-studio-code-bin
+voxtype
