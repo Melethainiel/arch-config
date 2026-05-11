@@ -93,6 +93,26 @@ else
 fi
 `
 
+const networkCommand = `
+strip_ansi() {
+  sed 's/\x1b\[[0-9;]*m//g'
+}
+
+default_iface=$(ip route show default 2>/dev/null | awk '{ for (i = 1; i <= NF; i++) if ($i == "dev") { print $(i + 1); exit } }')
+
+if [ -n "$default_iface" ] && [ ! -d "/sys/class/net/$default_iface/wireless" ]; then
+  printf 'ETH'
+  exit 0
+fi
+
+iface=$default_iface
+[ -n "$iface" ] || iface=$(iwctl station list 2>/dev/null | strip_ansi | awk '$2 == "connected" { print $1; exit }')
+[ -n "$iface" ] || { printf 'OFF'; exit 0; }
+
+network=$(iwctl station "$iface" show 2>/dev/null | strip_ansi | sed -n 's/.*Connected network[[:space:]]*//p' | head -n1)
+[ -n "$network" ] && printf '%s' "$network" || printf 'OFF'
+`
+
 export function SystemStatus() {
   const notifications = createPoll("0", 1000, [
     "bash",
@@ -106,18 +126,15 @@ export function SystemStatus() {
     "pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -o '[0-9][0-9]*%' | head -n1 || true",
   ], (out) => out.trim())
 
-   const network = createPoll("", 5000, [
+  const network = createPoll("", 5000, [
     "bash",
     "-c",
-    "eth=$(ip -o link show type ether 2>/dev/null | awk -F': ' '!/lo/{print $2; exit}'); " +
-    "if [ -n \"$eth\" ] && ip addr show \"$eth\" 2>/dev/null | grep -q 'inet '; then echo 'ETH'; " +
-    "else iface=$(iwctl station list 2>/dev/null | awk 'NR>4 && NF{print $1; exit}'); " +
-    "[ -n \"$iface\" ] && iwctl station \"$iface\" show 2>/dev/null | sed -n 's/.*Connected network[[:space:]]*//p' | head -n1; fi",
+    networkCommand,
   ], (out) => {
     const val = out.trim()
     if (val === "ETH") return "󰈀 ethernet"
-    if (val) return `󰖩 ${val}`
-    return "󰖪 off"
+    if (val && val !== "OFF") return ` ${val}`
+    return " off"
   })
 
   const battery = createPoll("", 5000, [
@@ -132,7 +149,7 @@ export function SystemStatus() {
         <label label={volume((value) => ` ${value}`)} />
       </button>
       <button class="bubble network" onClicked={() => run(["ghostty", "--class=com.mitchellh.ghostty.impala", "-e", "impala"])}>
-        <label label={network()} />
+        <label label={network((value) => value)} />
       </button>
       <label class="bubble battery" visible={battery((value) => value.length > 0)} xalign={0} label={battery((value) => value)} />
       <button class="bubble notifications" onClicked={() => run(["swaync-client", "-t", "-sw"])}>
