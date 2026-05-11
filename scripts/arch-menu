@@ -68,6 +68,13 @@ present_terminal() {
   ghostty --class="com.mitchellh.ghostty.$class" -e "$@"
 }
 
+present_terminal_success() {
+  local class="$1"
+  shift
+
+  ghostty --class="com.mitchellh.ghostty.$class" -e bash -lc '"$@"; printf "\nPress any key to close..."; read -r -n 1 -s; exit 0' bash "$@"
+}
+
 open_config() {
   local file="$1"
   local editor
@@ -295,7 +302,7 @@ ensure_ssh_usb_cmd() {
     run="$(menu "Install SSH USB?" '  Yes, run installer' '  Cancel')"
     case "$run" in
       *Yes*)
-        present_terminal ssh-usb bash "$installer"
+        present_terminal_success ssh-usb bash "$installer" || true
         return 1
         ;;
       *) return 1 ;;
@@ -310,9 +317,9 @@ run_ssh_usb_cmd() {
   local cmd="$1"
   local path
 
-  ensure_ssh_usb_cmd "$cmd" || return 1
+  ensure_ssh_usb_cmd "$cmd" || return 0
   path="$(ssh_usb_cmd_path "$cmd")"
-  present_terminal ssh-usb "$path"
+  present_terminal_success ssh-usb "$path" || true
 }
 
 show_security_setup_menu() {
