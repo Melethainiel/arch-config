@@ -40,7 +40,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 - `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
 - `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git`.
 - `packages/dev.txt` contient les outils dev optionnels comme Docker.
-- `howdy-git` est installe depuis l'AUR et le script ajoute `pam_howdy.so` a `sudo` et `hyprlock` en `sufficient`, avec fallback mot de passe via la pile PAM existante.
+- Howdy est optionnel, car il depend d'une camera IR. Il se configure depuis le menu `Setup > Security > Face unlock`.
 
 ## Lancement
 
@@ -64,7 +64,13 @@ La nouvelle appartenance au groupe est prise en compte apres reconnexion.
 
 ## Howdy
 
-Howdy est configure dans PAM pour `sudo` et `hyprlock` uniquement. La ligne ajoutee est volontairement limitee a ces services :
+Howdy est optionnel, car il ne fonctionne correctement que sur les machines avec camera IR. Le setup est lance depuis `arch-menu` :
+
+```text
+Setup > Security > Face unlock
+```
+
+Le script installe `howdy-git`, affiche les chemins camera detectes, ouvre `sudo howdy config`, ajoute le modele visage, puis configure PAM pour `sudo` et `hyprlock` uniquement. La ligne ajoutee est volontairement limitee a ces services :
 
 ```pam
 auth        sufficient  pam_howdy.so
@@ -72,14 +78,11 @@ auth        sufficient  pam_howdy.so
 
 Si la reconnaissance echoue ou expire, PAM continue vers l'authentification classique et demande le mot de passe.
 
-La configuration camera reste a faire par machine avec :
+La configuration camera reste specifique a chaque machine. Sur le Zenbook, le flux IR teste est :
 
-```bash
-sudo howdy config
-sudo howdy add
+```text
+/dev/v4l/by-path/pci-0000:00:14.0-usb-0:5:1.2-video-index0
 ```
-
-Sur le Zenbook, le flux IR teste est `/dev/v4l/by-path/pci-0000:00:14.0-usb-0:5:1.2-video-index0`.
 
 ## AGS
 
@@ -134,3 +137,5 @@ Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`,
 `dotfiles/inputrc` configure les fleches haut/bas pour rechercher dans l'historique a partir du debut deja tape.
 
 Exemple : apres avoir tape `z ar`, fleche haut remonte uniquement les commandes qui commencent par `z ar`.
+
+Le script ajoute aussi `~/.local/bin` au `PATH` dans `~/.bash_profile` et `~/.bashrc`, afin que les scripts installes depuis `scripts/` soient disponibles dans les terminaux interactifs et les lanceurs qui passent par `bash -lc`.

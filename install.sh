@@ -151,30 +151,27 @@ configure_docker() {
   sudo usermod -aG docker "$USER"
 }
 
-ensure_pam_howdy() {
-  local pam_file="$1"
+configure_shell_path() {
+  local bash_profile="$HOME/.bash_profile"
+  local bashrc="$HOME/.bashrc"
+  local marker="# arch-config local bin"
 
-  [[ -f "$pam_file" ]] || return 0
+  touch "$bash_profile"
+  touch "$bashrc"
 
-  if sudo grep -Eq '^[[:space:]]*auth[[:space:]]+sufficient[[:space:]]+pam_howdy\.so([[:space:]]|$)' "$pam_file"; then
-    return 0
+  if ! grep -qF "$marker" "$bash_profile"; then
+    {
+      printf '\n%s\n' "$marker"
+      printf 'export PATH="$HOME/.local/bin:$PATH"\n'
+    } >>"$bash_profile"
   fi
 
-  if sudo grep -q '^#%PAM-1\.0$' "$pam_file"; then
-    sudo sed -i '0,/^#%PAM-1\.0$/s//#%PAM-1.0\n\nauth        sufficient  pam_howdy.so/' "$pam_file"
-  else
-    sudo sed -i '0,/^[[:space:]]*auth[[:space:]]/s//auth        sufficient  pam_howdy.so\n&/' "$pam_file"
+  if ! grep -qF "$marker" "$bashrc"; then
+    {
+      printf '\n%s\n' "$marker"
+      printf 'export PATH="$HOME/.local/bin:$PATH"\n'
+    } >>"$bashrc"
   fi
-}
-
-configure_howdy() {
-  if [[ ! -e /usr/lib/security/pam_howdy.so && ! -e /lib/security/pam_howdy.so ]]; then
-    printf 'Howdy PAM module not found; skipping PAM configuration.\n'
-    return 0
-  fi
-
-  ensure_pam_howdy /etc/pam.d/sudo
-  ensure_pam_howdy /etc/pam.d/hyprlock
 }
 
 should_overwrite_applied_theme() {
@@ -207,6 +204,13 @@ install_dotfiles() {
   fi
 
   install -Dm644 "$DOTFILES_DIR/inputrc" "$HOME/.inputrc"
+
+  if [[ -d "$DOTFILES_DIR/environment.d" ]]; then
+    install -d "$HOME/.config/environment.d"
+    cp -R "$DOTFILES_DIR/environment.d/." "$HOME/.config/environment.d/"
+    systemctl --user import-environment PATH >/dev/null 2>&1 || true
+  fi
+
   install -d "$HOME/.config/ags"
   if [[ "$overwrite_theme" -eq 1 ]]; then
     find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
@@ -410,8 +414,8 @@ main() {
   configure_network
   configure_hardware_services
   configure_docker
+  configure_shell_path
   install_dotfiles
-  configure_howdy
   install_scripts
   install_themes
   configure_voxtype

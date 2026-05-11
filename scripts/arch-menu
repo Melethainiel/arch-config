@@ -326,15 +326,19 @@ show_security_setup_menu() {
   local choice
 
   choice="$(menu Security \
-    '󰈷  Fingerprint' \
-    '  Fido2' \
+    '󰌢  Face unlock' \
     '󰌆  Load SSH keys' \
     '󰌆  SSH key status' \
     '󰌇  Unload SSH keys')"
 
   case "$choice" in
-    *Fingerprint) notify_missing "Fingerprint setup" ;;
-    *Fido2) notify_missing "Fido2 setup" ;;
+    *"Face unlock"*)
+      if ! command -v arch-setup-howdy >/dev/null 2>&1; then
+        notify_missing "arch-setup-howdy"
+        return
+      fi
+      present_terminal_success howdy arch-setup-howdy
+      ;;
     *"Load SSH"*)
       run_ssh_usb_cmd ssh-usb-load
       ;;

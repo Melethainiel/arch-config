@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ensure_pam_howdy() {
+  local pam_file="$1"
+
+  [[ -f "$pam_file" ]] || return 0
+
+  if sudo grep -Eq '^[[:space:]]*auth[[:space:]]+sufficient[[:space:]]+pam_howdy\.so([[:space:]]|$)' "$pam_file"; then
+    return 0
+  fi
+
+  if sudo grep -q '^#%PAM-1\.0$' "$pam_file"; then
+    sudo sed -i '0,/^#%PAM-1\.0$/s//#%PAM-1.0\n\nauth        sufficient  pam_howdy.so/' "$pam_file"
+  else
+    sudo sed -i '0,/^[[:space:]]*auth[[:space:]]/s//auth        sufficient  pam_howdy.so\n&/' "$pam_file"
+  fi
+}
+
+install_howdy() {
+  sudo pacman -S --needed v4l-utils
+
+  if ! command -v yay >/dev/null 2>&1; then
+    printf 'yay is required to install howdy-git from the AUR. Run ./install.sh first.\n' >&2
+    exit 1
+  fi
+
+  yay -S --needed howdy-git
+}
+
+show_video_devices() {
+  printf '\nDetected video devices:\n'
+  v4l2-ctl --list-devices || true
+
+  printf '\nStable device paths:\n'
+  ls -l /dev/v4l/by-path 2>/dev/null || true
+}
+
+configure_pam() {
+  if [[ ! -e /usr/lib/security/pam_howdy.so && ! -e /lib/security/pam_howdy.so ]]; then
+    printf 'pam_howdy.so was not found after installation.\n' >&2
+    exit 1
+  fi
+
+  ensure_pam_howdy /etc/pam.d/sudo
+  ensure_pam_howdy /etc/pam.d/hyprlock
+}
+
+main() {
+  install_howdy
+  show_video_devices
+
+  printf '\nConfigure the IR camera path now, then add your face model.\n'
+  printf 'Use a stable /dev/v4l/by-path/...-video-index0 path when possible.\n\n'
+
+  sudo howdy config
+  sudo howdy add
+  configure_pam
+
+  printf '\nHowdy configured for sudo and hyprlock. Password fallback remains enabled.\n'
+}
+
+main "$@"
