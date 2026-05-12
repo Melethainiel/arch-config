@@ -270,7 +270,8 @@ install_dotfiles() {
   if [[ -d "$DOTFILES_DIR/environment.d" ]]; then
     install -d "$HOME/.config/environment.d"
     cp -R "$DOTFILES_DIR/environment.d/." "$HOME/.config/environment.d/"
-    systemctl --user import-environment PATH >/dev/null 2>&1 || true
+    export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
+    systemctl --user import-environment PATH SSH_AUTH_SOCK >/dev/null 2>&1 || true
   fi
 
   install -d "$HOME/.config/ags"
