@@ -162,6 +162,11 @@ configure_hardware_services() {
   sudo systemctl enable --now power-profiles-daemon.service
 }
 
+configure_keyring_services() {
+  systemctl --user enable --now gnome-keyring-daemon.socket
+  systemctl --user start gnome-keyring-daemon.service >/dev/null 2>&1 || true
+}
+
 configure_docker() {
   sudo systemctl enable --now docker.service
   sudo usermod -aG docker "$USER"
@@ -475,6 +480,7 @@ main() {
   install_aur_packages
   configure_network
   configure_hardware_services
+  configure_keyring_services
   configure_docker
   configure_mise
   configure_shell_path

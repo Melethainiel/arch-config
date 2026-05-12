@@ -1,5 +1,4 @@
 hl.on("hyprland.start", function()
-  hl.exec_cmd("sh -lc 'pkill -x ksecretd || true; systemctl --user start gnome-keyring-daemon.socket gnome-keyring-daemon.service'")
   hl.exec_cmd("ags run ~/.config/ags/app.tsx")
   hl.exec_cmd("wl-paste --type text --watch cliphist store")
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
