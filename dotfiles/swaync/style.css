@@ -32,18 +32,26 @@
 
 .notification-row {
   margin: 0 0 10px;
+  background: transparent;
+  box-shadow: none;
   outline: none;
 }
 
 .notification-background {
   background: transparent;
+  box-shadow: none;
+}
+
+.notification-content {
+  background: transparent;
+  box-shadow: none;
 }
 
 .notification {
   padding: 12px;
   border: 1px solid @swaync_border;
   background: linear-gradient(135deg, @swaync_card, @swaync_bg_alt);
-  box-shadow: 0 18px 44px @swaync_shadow;
+  box-shadow: none;
 }
 
 .notification.critical {

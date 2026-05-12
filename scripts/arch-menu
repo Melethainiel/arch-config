@@ -261,7 +261,7 @@ show_config_setup_menu() {
     '  Fastfetch')"
 
   case "$choice" in
-    *Hyprland) open_config "$HOME/.config/hypr/hyprland.conf" ;;
+    *Hyprland) open_config "$HOME/.config/hypr/hyprland.lua" ;;
     *Hypridle) open_config "$HOME/.config/hypr/hypridle.conf" ;;
     *Hyprlock) open_config "$HOME/.config/hypr/hyprlock.conf" ;;
     *Fuzzel) open_config "$HOME/.config/fuzzel/fuzzel.ini" ;;
