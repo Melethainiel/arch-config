@@ -35,10 +35,10 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 
 ## Paquets
 
-- `packages/core.txt` contient le socle commun de tous les PC, dont `mise`.
-- `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, polices et apps desktop de base.
+- `packages/core.txt` contient le socle commun de tous les PC, dont `mise` et `zoxide`. L'installation configure aussi Node.js LTS en global via `mise`.
+- `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, polices et apps desktop de base comme Discord.
 - `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
-- `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git`.
+- `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git` et OpenCode.
 - `packages/dev.txt` contient les outils dev optionnels comme Docker.
 - Howdy est optionnel, car il depend d'une camera IR. Il se configure depuis le menu `Setup > Security > Face unlock`.
 
@@ -116,7 +116,7 @@ Les scripts de `scripts/` sont installes dans `~/.local/bin`.
 
 ## Themes
 
-`matugen` genere les couleurs depuis un wallpaper pour AGS, SwayNC, Hyprland, Ghostty, Fuzzel, GTK et VS Code (via l'extension Material Code) sans migrer Hyprland vers Lua.
+`matugen` genere les couleurs depuis un wallpaper pour AGS, SwayNC, Hyprland, Ghostty, Fuzzel, GTK et VS Code (via l'extension Material Code). La configuration Hyprland 0.55+ est en Lua avec `dotfiles/hypr/hyprland.lua` et ses modules.
 
 Apres installation, lancer :
 
@@ -130,7 +130,7 @@ Le repo inclut aussi des presets fixes. Pour appliquer Nord sur Ghostty, Hyprlan
 theme-switch nord
 ```
 
-Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, ecrit aussi `~/.config/hypr/hyprpaper.conf` pour que le wallpaper persiste au reboot, tente de le synchroniser avec le theme Pixie de SDDM, puis recharge les composants de session.
+Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, ecrit aussi `~/.config/hypr/hyprpaper.conf` pour que le wallpaper persiste au reboot, tente de le synchroniser avec le theme Pixie de SDDM, puis recharge les composants de session. Cote Hyprland, le theme genere est `~/.config/hypr/theme.lua`.
 
 ## Shell
 

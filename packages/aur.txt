@@ -1,5 +1,6 @@
 aylurs-gtk-shell-git
 brave-bin
+opencode-bin
 pixie-sddm-git
 visual-studio-code-bin
-voxtype
+voxtype-bin

@@ -39,6 +39,7 @@ impala
 wiremix
 obsidian
 bitwarden
+discord
 lazydocker
 element-desktop
 ttf-jetbrains-mono-nerd

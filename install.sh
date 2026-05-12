@@ -167,25 +167,46 @@ configure_docker() {
   sudo usermod -aG docker "$USER"
 }
 
+configure_mise() {
+  command -v mise >/dev/null 2>&1 || die "mise is required to install global tools"
+
+  mise use --global --yes node@lts
+}
+
 configure_shell_path() {
   local bash_profile="$HOME/.bash_profile"
   local bashrc="$HOME/.bashrc"
-  local marker="# arch-config local bin"
+  local local_bin_marker="# arch-config local bin"
+  local mise_shims_marker="# arch-config mise shims"
 
   touch "$bash_profile"
   touch "$bashrc"
 
-  if ! grep -qF "$marker" "$bash_profile"; then
+  if ! grep -qF "$local_bin_marker" "$bash_profile"; then
     {
-      printf '\n%s\n' "$marker"
+      printf '\n%s\n' "$local_bin_marker"
       printf 'export PATH="$HOME/.local/bin:$PATH"\n'
     } >>"$bash_profile"
   fi
 
-  if ! grep -qF "$marker" "$bashrc"; then
+  if ! grep -qF "$local_bin_marker" "$bashrc"; then
     {
-      printf '\n%s\n' "$marker"
+      printf '\n%s\n' "$local_bin_marker"
       printf 'export PATH="$HOME/.local/bin:$PATH"\n'
+    } >>"$bashrc"
+  fi
+
+  if ! grep -qF "$mise_shims_marker" "$bash_profile"; then
+    {
+      printf '\n%s\n' "$mise_shims_marker"
+      printf 'export PATH="$HOME/.local/share/mise/shims:$PATH"\n'
+    } >>"$bash_profile"
+  fi
+
+  if ! grep -qF "$mise_shims_marker" "$bashrc"; then
+    {
+      printf '\n%s\n' "$mise_shims_marker"
+      printf 'export PATH="$HOME/.local/share/mise/shims:$PATH"\n'
     } >>"$bashrc"
   fi
 }
@@ -195,6 +216,7 @@ should_overwrite_applied_theme() {
 
   if [[ ! -f "$HOME/.config/ags/theme.css" ]] \
     && [[ ! -f "$HOME/.config/swaync/theme.css" ]] \
+    && [[ ! -f "$HOME/.config/hypr/theme.lua" ]] \
     && [[ ! -f "$HOME/.config/hypr/theme.conf" ]] \
     && [[ ! -f "$HOME/.config/ghostty/theme.conf" ]] \
     && [[ ! -f "$HOME/.config/ghostty/themes/Matugen" ]] \
@@ -210,6 +232,25 @@ should_overwrite_applied_theme() {
     [Yy]|[Yy][Ee][Ss]) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+cleanup_legacy_hyprland_conf() {
+  local hypr_dir="$HOME/.config/hypr"
+
+  rm -f \
+    "$hypr_dir/hyprland.conf" \
+    "$hypr_dir/monitors.conf" \
+    "$hypr_dir/programs.conf" \
+    "$hypr_dir/autostart.conf" \
+    "$hypr_dir/environment.conf" \
+    "$hypr_dir/permissions.conf" \
+    "$hypr_dir/appearance.conf" \
+    "$hypr_dir/layout.conf" \
+    "$hypr_dir/windowrules.conf" \
+    "$hypr_dir/input.conf" \
+    "$hypr_dir/keybindings.conf" \
+    "$hypr_dir/hyprland-gui.conf" \
+    "$hypr_dir/theme.conf"
 }
 
 install_dotfiles() {
@@ -254,18 +295,23 @@ install_dotfiles() {
 
   if [[ -d "$DOTFILES_DIR/hypr" ]]; then
     install -d "$HOME/.config/hypr"
+    cleanup_legacy_hyprland_conf
     if [[ "$overwrite_theme" -eq 1 ]]; then
       cp -R "$DOTFILES_DIR/hypr/." "$HOME/.config/hypr/"
     else
       find "$DOTFILES_DIR/hypr" -mindepth 1 -maxdepth 1 \
-        ! -name 'theme.conf' \
+        ! -name 'theme.lua' \
         -exec cp -R -t "$HOME/.config/hypr" {} +
+      if [[ ! -f "$HOME/.config/hypr/theme.lua" ]]; then
+        cp -R "$DOTFILES_DIR/hypr/theme.lua" "$HOME/.config/hypr/"
+      fi
     fi
   fi
 
   if [[ -d "$DOTFILES_DIR/matugen" ]]; then
     install -d "$HOME/.config/matugen"
     cp -R "$DOTFILES_DIR/matugen/." "$HOME/.config/matugen/"
+    rm -f "$HOME/.config/matugen/templates/hyprland-theme.conf"
   fi
 
   if [[ -d "$DOTFILES_DIR/voxtype" ]]; then
@@ -430,6 +476,7 @@ main() {
   configure_network
   configure_hardware_services
   configure_docker
+  configure_mise
   configure_shell_path
   install_dotfiles
   install_scripts

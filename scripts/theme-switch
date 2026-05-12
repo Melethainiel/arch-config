@@ -75,6 +75,7 @@ confirm_theme_overwrite() {
 
   if [[ ! -f "$config_home/ags/theme.css" ]] \
     && [[ ! -f "$config_home/swaync/theme.css" ]] \
+    && [[ ! -f "$config_home/hypr/theme.lua" ]] \
     && [[ ! -f "$config_home/hypr/theme.conf" ]] \
     && [[ ! -f "$config_home/ghostty/theme.conf" ]] \
     && [[ ! -f "$config_home/ghostty/themes/Matugen" ]] \
@@ -178,7 +179,8 @@ apply_theme_preset() {
 
   install -Dm644 "$source_dir/ags-theme.css" "$config_home/ags/theme.css"
   install -Dm644 "$source_dir/swaync-theme.css" "$config_home/swaync/theme.css"
-  install -Dm644 "$source_dir/hyprland-theme.conf" "$config_home/hypr/theme.conf"
+  install -Dm644 "$source_dir/hyprland-theme.lua" "$config_home/hypr/theme.lua"
+  rm -f "$config_home/hypr/theme.conf"
   install -Dm644 "$source_dir/ghostty.conf" "$config_home/ghostty/theme.conf"
   install -Dm644 "$source_dir/ghostty.conf" "$config_home/ghostty/themes/${name^}"
   install -Dm644 "$source_dir/btop.theme" "$config_home/btop/themes/current.theme"
@@ -249,6 +251,7 @@ if ! confirm_theme_overwrite; then
 fi
 
 matugen image "$wallpaper" -m dark -c "$matugen_config"
+rm -f "$config_home/hypr/theme.conf"
 ensure_btop_current_theme
 ensure_ghostty_theme_include
 

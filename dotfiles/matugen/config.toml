@@ -12,8 +12,8 @@ input_path = '~/.config/matugen/templates/swaync-theme.css'
 output_path = '~/.config/swaync/theme.css'
 
 [templates.hyprland]
-input_path = '~/.config/matugen/templates/hyprland-theme.conf'
-output_path = '~/.config/hypr/theme.conf'
+input_path = '~/.config/matugen/templates/hyprland-theme.lua'
+output_path = '~/.config/hypr/theme.lua'
 
 [templates.ghostty]
 input_path = '~/.config/matugen/templates/ghostty-theme.conf'

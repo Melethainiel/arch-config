@@ -6,3 +6,4 @@ unzip
 fastfetch
 btop
 mise
+zoxide
