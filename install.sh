@@ -134,6 +134,22 @@ install_aur_packages() {
 }
 
 configure_network() {
+  sudo mkdir -p /etc/iwd
+  sudo tee /etc/iwd/main.conf >/dev/null <<EOF
+[General]
+EnableNetworkConfiguration=true
+
+[Network]
+NameResolvingService=systemd
+EOF
+
+  sudo systemctl enable --now systemd-resolved.service
+  sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+  sudo mkdir -p /etc/systemd/network
+  sudo cp "$DOTFILES_DIR/systemd-network/20-wired.network" /etc/systemd/network/
+  sudo systemctl enable --now systemd-networkd.service
+
   sudo systemctl enable --now iwd.service
 
   # Keep one Wi-Fi backend. These commands are tolerant when units are absent.
