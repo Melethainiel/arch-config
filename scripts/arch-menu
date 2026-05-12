@@ -168,12 +168,12 @@ show_default_browser_menu() {
 
 set_default_terminal() {
   local terminal="$1"
-  local file="$HOME/.config/hypr/programs.conf"
+  local file="$HOME/.config/hypr/programs.lua"
 
   save_default TERMINAL "$terminal"
 
   if [[ -f "$file" ]]; then
-    sed -i "s|^\$terminal = .*|\$terminal = $terminal|" "$file"
+    sed -i "s|^terminal = .*|terminal = \"$terminal\"|" "$file"
     hyprctl reload >/dev/null 2>&1 || true
   fi
 
@@ -374,9 +374,9 @@ show_setup_menu() {
     *Bluetooth) launch_tui bluetui bluetui ;;
     *Power*) show_power_profile_menu ;;
     *System*) show_sleep_setup_menu ;;
-    *Monitors) open_config "$HOME/.config/hypr/monitors.conf" ;;
-    *Keybindings) open_config "$HOME/.config/hypr/keybindings.conf" ;;
-    *Input) open_config "$HOME/.config/hypr/input.conf" ;;
+    *Monitors) open_config "$HOME/.config/hypr/monitors.lua" ;;
+    *Keybindings) open_config "$HOME/.config/hypr/keybindings.lua" ;;
+    *Input) open_config "$HOME/.config/hypr/input.lua" ;;
     *Defaults) show_default_setup_menu ;;
     *DNS) show_dns_setup_menu ;;
     *Security) show_security_setup_menu ;;
