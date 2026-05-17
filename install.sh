@@ -325,6 +325,10 @@ install_dotfiles() {
     cp -R "$DOTFILES_DIR/voxtype/." "$HOME/.config/voxtype/"
   fi
 
+  if [[ -f "$DOTFILES_DIR/electron41-flags.conf" ]]; then
+    install -Dm644 "$DOTFILES_DIR/electron41-flags.conf" "$HOME/.config/electron41-flags.conf"
+  fi
+
   if [[ -d "$DOTFILES_DIR/ghostty" ]]; then
     install -d "$HOME/.config/ghostty/themes"
     if [[ "$overwrite_theme" -eq 1 ]]; then
