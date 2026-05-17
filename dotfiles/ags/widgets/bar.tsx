@@ -3,6 +3,7 @@ import { Astal } from "ags/gtk4"
 import { createPoll } from "ags/time"
 import { NowPlaying } from "./now-playing"
 import { SystemStatus } from "./system-status"
+import { Tray } from "./tray"
 import { Voxtype } from "./voxtype"
 import { Weather } from "./weather"
 import { Workspaces } from "./workspaces"
@@ -37,6 +38,7 @@ export function Bar(monitor = 0) {
         </box>
 
         <box $type="end" class="right" spacing={8}>
+          <Tray />
           <SystemStatus />
         </box>
       </centerbox>

@@ -1,5 +1,6 @@
 hyprland
 hyprpolkitagent
+gnome-keyring
 hypridle
 hyprlock
 hyprpaper
@@ -15,6 +16,8 @@ cliphist
 ghostty
 fuzzel
 nautilus
+gvfs-smb
+gnome-disk-utility
 grim
 slurp
 hyprshot

@@ -36,7 +36,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 ## Paquets
 
 - `packages/core.txt` contient le socle commun de tous les PC, dont `mise` et `zoxide`. L'installation configure aussi Node.js LTS en global via `mise`.
-- `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, polices et apps desktop de base comme Discord.
+- `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, polices et apps desktop de base comme GNOME Disks et Discord.
 - `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
 - `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git` et OpenCode.
 - `packages/dev.txt` contient les outils dev optionnels comme Docker.
@@ -111,6 +111,8 @@ La barre active est AGS (`dotfiles/ags`). Elle est composee de bulles separees e
 ## Menu Systeme
 
 `SUPER+ALT+SPACE` ouvre `arch-menu`, un menu Fuzzel pour lancer les apps, afficher About via Fastfetch, acceder au setup, verrouiller, suspendre, quitter Hyprland, redemarrer ou eteindre.
+
+`SUPER+SHIFT+I` active/desactive `hypridle` pour la session courante.
 
 Les scripts de `scripts/` sont installes dans `~/.local/bin`.
 

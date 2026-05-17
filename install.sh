@@ -274,6 +274,11 @@ install_dotfiles() {
     systemctl --user import-environment PATH SSH_AUTH_SOCK >/dev/null 2>&1 || true
   fi
 
+  if [[ -d "$DOTFILES_DIR/autostart" ]]; then
+    install -d "$HOME/.config/autostart"
+    cp -R "$DOTFILES_DIR/autostart/." "$HOME/.config/autostart/"
+  fi
+
   install -d "$HOME/.config/ags"
   if [[ "$overwrite_theme" -eq 1 ]]; then
     find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
@@ -323,6 +328,10 @@ install_dotfiles() {
   if [[ -d "$DOTFILES_DIR/voxtype" ]]; then
     install -d "$HOME/.config/voxtype"
     cp -R "$DOTFILES_DIR/voxtype/." "$HOME/.config/voxtype/"
+  fi
+
+  if [[ -f "$DOTFILES_DIR/brave-flags.conf" ]]; then
+    install -Dm644 "$DOTFILES_DIR/brave-flags.conf" "$HOME/.config/brave-flags.conf"
   fi
 
   if [[ -f "$DOTFILES_DIR/electron41-flags.conf" ]]; then

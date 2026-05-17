@@ -1,5 +1,7 @@
 local centered_tools = {
   "impala",
+  "btop",
+  "lazydocker",
   "wiremix",
   "bluetui",
   "editor",

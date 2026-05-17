@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+notify() {
+  command -v notify-send >/dev/null 2>&1 || return 0
+  notify-send -u low "Hypridle" "$1" || true
+}
+
+if systemctl --user is-active --quiet hypridle.service; then
+  systemctl --user stop hypridle.service
+  hyprctl dispatch dpms on >/dev/null 2>&1 || true
+  notify "Idle auto desactive."
+else
+  systemctl --user start hypridle.service
+  notify "Idle auto active."
+fi

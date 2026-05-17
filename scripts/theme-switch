@@ -114,6 +114,8 @@ ensure_btop_current_theme() {
   local btop_config="$config_home/btop/btop.conf"
 
   if [[ ! -f "$btop_config" ]]; then
+    install -d "$(dirname "$btop_config")"
+    printf 'color_theme = "current"\n' >"$btop_config"
     return 0
   fi
 

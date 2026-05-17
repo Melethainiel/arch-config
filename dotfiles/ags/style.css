@@ -96,9 +96,67 @@
 .volume,
 .network,
 .battery,
-.notifications {
+.notifications,
+.tray {
   min-height: 34px;
   border-radius: 999px;
+}
+
+.tray {
+  padding: 0 8px;
+}
+
+.tray-item {
+  min-width: 24px;
+  min-height: 34px;
+  padding: 0 2px;
+  border-radius: 999px;
+}
+
+.tray-item image {
+  -gtk-icon-size: 16px;
+}
+
+.tray-item:hover {
+  background: @arch_surface_hover;
+}
+
+popover.background,
+popover.background contents,
+popover.menu,
+popover.menu contents {
+  border-radius: 14px;
+  background: @arch_bg;
+  color: @arch_text;
+}
+
+popover.background {
+  padding: 6px;
+  border: 1px solid @arch_surface_hover;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+popover.background arrow {
+  background: @arch_bg;
+}
+
+popover.menu modelbutton,
+popover.menu button {
+  min-height: 28px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: @arch_text;
+}
+
+popover.menu modelbutton:hover,
+popover.menu button:hover {
+  background: @arch_surface_hover;
+}
+
+popover.menu separator {
+  min-height: 1px;
+  margin: 4px 6px;
+  background: @arch_surface_hover;
 }
 
 .volume {
