@@ -36,7 +36,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 ## Paquets
 
 - `packages/core.txt` contient le socle commun de tous les PC, dont `mise` et `zoxide`. L'installation configure aussi Node.js LTS en global via `mise`.
-- `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, polices et apps desktop de base comme GNOME Disks et Discord.
+- `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, Plymouth, polices et apps desktop de base comme GNOME Disks et Discord.
 - `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
 - `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git` et OpenCode.
 - `packages/dev.txt` contient les outils dev optionnels comme Docker.
@@ -55,6 +55,12 @@ Le script doit etre lance avec l'utilisateur normal, pas avec `root`.
 La stack retenue est `iwd + Impala`.
 
 Le script active `iwd` et desactive `NetworkManager` et `wpa_supplicant` si ces services existent, pour eviter que plusieurs gestionnaires Wi-Fi se battent entre eux.
+
+## Plymouth
+
+Le script installe `plymouth`, `cantarell-fonts`, telecharge le theme Arch `arch-mac-style` depuis <https://www.gnome-look.org/p/2106821>, l'installe dans `/usr/share/plymouth/themes/`, ajoute le hook `plymouth` ou `sd-plymouth` dans `/etc/mkinitcpio.conf`, regenere les initramfs avec `mkinitcpio -P`, puis ajoute `quiet splash` aux entrees systemd-boot presentes dans `/boot/loader/entries` ou a `GRUB_CMDLINE_LINUX_DEFAULT` si GRUB est utilise.
+
+Avec SDDM, l'installateur active `sddm-plymouth.service` quand l'unite existe afin de garder une transition propre entre le splash et l'ecran de connexion.
 
 ## Docker
 

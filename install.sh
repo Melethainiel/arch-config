@@ -5,6 +5,8 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES_DIR="$ROOT_DIR/packages"
 DOTFILES_DIR="$ROOT_DIR/dotfiles"
 THEMES_DIR="$ROOT_DIR/themes"
+PLYMOUTH_ARCH_THEME=arch-mac-style
+PLYMOUTH_ARCH_THEME_API_URL=https://api.opendesktop.org/ocs/v1/content/data/2106821
 
 PACMAN_LISTS=(
   "$PACKAGES_DIR/core.txt"
@@ -160,6 +162,125 @@ EOF
 configure_hardware_services() {
   sudo systemctl enable --now bluetooth.service
   sudo systemctl enable --now power-profiles-daemon.service
+}
+
+configure_plymouth_mkinitcpio() {
+  local mkinitcpio_conf=/etc/mkinitcpio.conf
+  local hook=plymouth
+
+  [[ -f "$mkinitcpio_conf" ]] || return 0
+  grep -Eq '^HOOKS=.*\b(plymouth|sd-plymouth)\b' "$mkinitcpio_conf" && return 0
+
+  if grep -q '^HOOKS=.*\bsystemd\b' "$mkinitcpio_conf"; then
+    hook=sd-plymouth
+    sudo sed -i "/^HOOKS=/ s/\bsystemd\b/systemd $hook/" "$mkinitcpio_conf"
+  elif grep -q '^HOOKS=.*\bkms\b' "$mkinitcpio_conf"; then
+    sudo sed -i "/^HOOKS=/ s/\bkms\b/kms $hook/" "$mkinitcpio_conf"
+  elif grep -q '^HOOKS=.*\budev\b' "$mkinitcpio_conf"; then
+    sudo sed -i "/^HOOKS=/ s/\budev\b/udev $hook/" "$mkinitcpio_conf"
+  elif grep -q '^HOOKS=.*\bbase\b' "$mkinitcpio_conf"; then
+    sudo sed -i "/^HOOKS=/ s/\bbase\b/base $hook/" "$mkinitcpio_conf"
+  else
+    die "HOOKS line not found in /etc/mkinitcpio.conf"
+  fi
+}
+
+add_systemd_boot_arg() {
+  local entry="$1"
+  local arg="$2"
+
+  grep -Eq "^options[[:space:]].*(^|[[:space:]])$arg([[:space:]]|$)" "$entry" && return 0
+  sudo sed -i "/^options[[:space:]]/ s/[[:space:]]*$/ $arg/" "$entry"
+}
+
+add_grub_default_arg() {
+  local arg="$1"
+  local tmp
+
+  grep -Eq "^GRUB_CMDLINE_LINUX_DEFAULT=.*(^|[[:space:]])$arg([[:space:]]|\")" /etc/default/grub && return 0
+
+  tmp="$(mktemp)"
+  awk -v arg="$arg" '
+    BEGIN { done = 0 }
+    /^GRUB_CMDLINE_LINUX_DEFAULT=/ {
+      line = $0
+      if (line ~ /"$/) {
+        sub(/ *"$/, " " arg "\"", line)
+      } else if (line ~ /=$/) {
+        line = line "\"" arg "\""
+      } else {
+        line = line " " arg
+      }
+      print line
+      done = 1
+      next
+    }
+    { print }
+    END {
+      if (!done) {
+        print "GRUB_CMDLINE_LINUX_DEFAULT=\"" arg "\""
+      }
+    }
+  ' /etc/default/grub >"$tmp"
+  sudo install -m 644 "$tmp" /etc/default/grub
+  rm -f "$tmp"
+}
+
+configure_plymouth_boot_entries() {
+  local entry
+
+  if [[ -d /boot/loader/entries ]]; then
+    for entry in /boot/loader/entries/*.conf; do
+      [[ -f "$entry" ]] || continue
+      add_systemd_boot_arg "$entry" quiet
+      add_systemd_boot_arg "$entry" splash
+    done
+  fi
+
+  if [[ -f /etc/default/grub ]]; then
+    add_grub_default_arg quiet
+    add_grub_default_arg splash
+
+    if command -v grub-mkconfig >/dev/null 2>&1 && [[ -d /boot/grub ]]; then
+      sudo grub-mkconfig -o /boot/grub/grub.cfg
+    fi
+  fi
+}
+
+install_plymouth_arch_theme() {
+  local tmp_dir metadata archive download_link theme_dir theme_file
+
+  theme_dir="/usr/share/plymouth/themes/$PLYMOUTH_ARCH_THEME"
+  theme_file="$theme_dir/$PLYMOUTH_ARCH_THEME.plymouth"
+
+  if [[ -f "$theme_file" ]]; then
+    return 0
+  fi
+
+  tmp_dir="$(mktemp -d)"
+  trap 'rm -rf "$tmp_dir"' RETURN
+  metadata="$tmp_dir/plymouth-theme.xml"
+  archive="$tmp_dir/$PLYMOUTH_ARCH_THEME.zip"
+
+  curl -fsSL "$PLYMOUTH_ARCH_THEME_API_URL" -o "$metadata"
+  download_link="$(sed -n 's:.*<downloadlink[0-9]*>\([^<]*arch-mac-style\.zip\)</downloadlink[0-9]*>.*:\1:p' "$metadata")"
+
+  [[ -n "$download_link" ]] || die "could not find $PLYMOUTH_ARCH_THEME download link"
+
+  curl -fL "$download_link" -o "$archive"
+  sudo rm -rf "$theme_dir"
+  sudo unzip -q "$archive" -d /usr/share/plymouth/themes/
+  [[ -f "$theme_file" ]] || die "installed Plymouth theme is missing: $theme_file"
+}
+
+configure_plymouth() {
+  command -v plymouth-set-default-theme >/dev/null 2>&1 || return 0
+
+  install_plymouth_arch_theme
+  sudo plymouth-set-default-theme "$PLYMOUTH_ARCH_THEME" >/dev/null 2>&1 || true
+  configure_plymouth_mkinitcpio
+  configure_plymouth_boot_entries
+  sudo mkinitcpio -P
 }
 
 configure_keyring_services() {
@@ -405,7 +526,12 @@ install_dotfiles() {
   if [[ -d "$DOTFILES_DIR/sddm" ]]; then
     sudo mkdir -p /etc/sddm.conf.d
     sudo cp -R "$DOTFILES_DIR/sddm/sddm.conf" /etc/sddm.conf.d/sddm.conf
-    sudo systemctl enable --now sddm
+    if systemctl list-unit-files --type=service sddm-plymouth.service | grep -q '^sddm-plymouth\.service'; then
+      sudo systemctl disable --now sddm.service 2>/dev/null || true
+      sudo systemctl enable --now sddm-plymouth.service
+    else
+      sudo systemctl enable --now sddm.service
+    fi
   fi
 }
 
@@ -494,6 +620,7 @@ main() {
   install_aur_packages
   configure_network
   configure_hardware_services
+  configure_plymouth
   configure_keyring_services
   configure_docker
   configure_mise

@@ -48,5 +48,7 @@ element-desktop
 ttf-jetbrains-mono-nerd
 noto-fonts
 noto-fonts-emoji
+cantarell-fonts
 otf-font-awesome
 sddm
+plymouth
