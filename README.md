@@ -62,6 +62,16 @@ Le script installe `plymouth`, `cantarell-fonts`, telecharge le theme Arch `arch
 
 Avec SDDM, l'installateur active `sddm-plymouth.service` quand l'unite existe afin de garder une transition propre entre le splash et l'ecran de connexion.
 
+## Limine
+
+Limine est installe mais n'est pas active automatiquement par `install.sh`, pour garder systemd-boot comme chemin de secours. Le setup se lance depuis `arch-menu` :
+
+```text
+Setup > Bootloader > Setup Limine
+```
+
+Le script installe l'EFI Limine dans `/boot/EFI/Limine/BOOTX64.EFI`, ecrit `/boot/limine.conf`, ajoute une entree EFI `Limine`, et boote l'UKI existant `/boot/EFI/Linux/arch-linux.efi`. Il demande confirmation avant de mettre Limine en premier dans l'ordre de boot.
+
 ## Docker
 
 Le script installe Docker, active `docker.service` et ajoute l'utilisateur courant au groupe `docker`.

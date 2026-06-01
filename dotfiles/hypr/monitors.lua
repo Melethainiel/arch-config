@@ -1,5 +1,5 @@
 hl.monitor({
-  output = "HDMI-A-2",
+  output = "DP-2",
   mode = "3440x1440@59.97Hz",
   position = "0x0",
   scale = 1,
@@ -12,12 +12,12 @@ hl.monitor({
   mode = "3440x1440@49.99Hz",
   position = "1440x1090",
   scale = 1,
-  cm = "srgb",
+  cm = "hdr",
 })
 
 hl.workspace_rule({
   workspace = "1",
-  monitor = "HDMI-A-2",
+  monitor = "DP-2",
   default = true,
 })
 

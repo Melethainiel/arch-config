@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
+
+limine_efi_source() {
+  local candidate
+
+  for candidate in \
+    /usr/share/limine/BOOTX64.EFI \
+    /usr/share/limine/BOOTAA64.EFI; do
+    [[ -f "$candidate" ]] || continue
+    printf '%s\n' "$candidate"
+    return 0
+  done
+
+  return 1
+}
+
+boot_disk_and_part() {
+  local boot_source boot_device disk part
+
+  boot_source="$(findmnt -no SOURCE /boot)"
+  [[ -n "$boot_source" ]] || die "/boot is not mounted"
+
+  boot_device="$(readlink -f "$boot_source")"
+  [[ -b "$boot_device" ]] || die "could not resolve /boot device: $boot_source"
+
+  disk="/dev/$(lsblk -no PKNAME "$boot_device")"
+  part="$(lsblk -no PARTN "$boot_device")"
+
+  [[ -b "$disk" && -n "$part" ]] || die "could not identify /boot disk and partition"
+  printf '%s %s\n' "$disk" "$part"
+}
+
+install_limine_files() {
+  local source="$1"
+
+  [[ -f /boot/EFI/Linux/arch-linux.efi ]] || die "UKI not found: /boot/EFI/Linux/arch-linux.efi"
+
+  sudo install -Dm644 "$source" /boot/EFI/Limine/BOOTX64.EFI
+  sudo tee /boot/limine.conf >/dev/null <<'EOF'
+timeout: 5
+remember_last_entry: yes
+interface_branding: Arch Config
+
+/Arch Linux
+    protocol: efi
+    path: boot():/EFI/Linux/arch-linux.efi
+
+/systemd-boot fallback
+    protocol: efi
+    path: boot():/EFI/systemd/systemd-bootx64.efi
+EOF
+}
+
+limine_bootnum() {
+  efibootmgr -v | awk '/Limine/ { id=$1; sub(/^Boot/, "", id); sub(/\*/, "", id); print id }' | tail -n 1
+}
+
+ensure_limine_efi_entry() {
+  local disk part boot_order bootnum
+
+  bootnum="$(limine_bootnum)"
+  if [[ -n "$bootnum" ]]; then
+    printf 'Limine EFI entry already exists: Boot%s\n' "$bootnum"
+    return 0
+  fi
+
+  read -r disk part < <(boot_disk_and_part)
+  boot_order="$(efibootmgr | awk -F': ' '/^BootOrder:/ { print $2 }')"
+
+  sudo efibootmgr --create --disk "$disk" --part "$part" --label Limine --loader '\EFI\Limine\BOOTX64.EFI'
+  bootnum="$(limine_bootnum)"
+  [[ -n "$bootnum" ]] || die "Limine EFI entry was not created"
+
+  if [[ -n "$boot_order" ]]; then
+    sudo efibootmgr --bootorder "$boot_order,$bootnum"
+  fi
+}
+
+offer_limine_first() {
+  local answer boot_order bootnum
+
+  bootnum="$(limine_bootnum)"
+  [[ -n "$bootnum" ]] || die "Limine EFI entry was not created"
+
+  read -r -p "Put Limine first in EFI boot order now? [y/N] " answer
+  case "$answer" in
+    [Yy]|[Yy][Ee][Ss]) ;;
+    *)
+      printf 'Limine installed. Select it manually from firmware boot menu to test it.\n'
+      return 0
+      ;;
+  esac
+
+  boot_order="$(efibootmgr | awk -F': ' '/^BootOrder:/ { print $2 }')"
+  boot_order="$(printf '%s\n' "$boot_order" | tr ',' '\n' | grep -v "^$bootnum$" | paste -sd, -)"
+
+  if [[ -n "$boot_order" ]]; then
+    sudo efibootmgr --bootorder "$bootnum,$boot_order"
+  else
+    sudo efibootmgr --bootorder "$bootnum"
+  fi
+
+  printf 'Limine is now first in EFI boot order. systemd-boot remains available as fallback.\n'
+}
+
+main() {
+  local source
+
+  [[ -f /etc/arch-release ]] || die "this setup is intended for Arch Linux"
+  command -v efibootmgr >/dev/null 2>&1 || die "efibootmgr is required"
+  source="$(limine_efi_source)" || die "Limine EFI binary not found. Install the limine package."
+
+  install_limine_files "$source"
+  ensure_limine_efi_entry
+  offer_limine_first
+}
+
+main "$@"

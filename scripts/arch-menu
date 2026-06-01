@@ -351,6 +351,17 @@ show_security_setup_menu() {
   esac
 }
 
+show_bootloader_setup_menu() {
+  local choice
+
+  choice="$(menu Bootloader \
+    '󰐥  Setup Limine')"
+
+  case "$choice" in
+    *Limine*) present_terminal_success limine arch-setup-limine ;;
+  esac
+}
+
 show_setup_menu() {
   local choice
 
@@ -366,6 +377,7 @@ show_setup_menu() {
     '  Defaults' \
     '󰱔  DNS' \
     '  Security' \
+    '󰐥  Bootloader' \
     '  Config')"
 
   case "$choice" in
@@ -380,6 +392,7 @@ show_setup_menu() {
     *Defaults) show_default_setup_menu ;;
     *DNS) show_dns_setup_menu ;;
     *Security) show_security_setup_menu ;;
+    *Bootloader) show_bootloader_setup_menu ;;
     *Config) show_config_setup_menu ;;
   esac
 }

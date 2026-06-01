@@ -52,3 +52,5 @@ cantarell-fonts
 otf-font-awesome
 sddm
 plymouth
+limine
+efibootmgr
