@@ -1,2 +1,7 @@
 dotfiles/ags/@girs/
 dotfiles/ags/node_modules/
+
+# IA files
+.opencode/
+.agents/
+_bmad/
