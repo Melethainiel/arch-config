@@ -193,6 +193,14 @@ add_systemd_boot_arg() {
   sudo sed -i "/^options[[:space:]]/ s/[[:space:]]*$/ $arg/" "$entry"
 }
 
+add_kernel_cmdline_arg() {
+  local arg="$1"
+
+  [[ -f /etc/kernel/cmdline ]] || return 0
+  grep -Eq "(^|[[:space:]])$arg([[:space:]]|$)" /etc/kernel/cmdline && return 0
+  printf ' %s' "$arg" | sudo tee -a /etc/kernel/cmdline >/dev/null
+}
+
 add_grub_default_arg() {
   local arg="$1"
   local tmp
@@ -237,6 +245,11 @@ configure_plymouth_boot_entries() {
     done
   fi
 
+  # UKI/systemd-stub entries embed the cmdline from this file when mkinitcpio
+  # regenerates /boot/EFI/Linux/*.efi.
+  add_kernel_cmdline_arg quiet
+  add_kernel_cmdline_arg splash
+
   if [[ -f /etc/default/grub ]]; then
     add_grub_default_arg quiet
     add_grub_default_arg splash
@@ -258,7 +271,6 @@ install_plymouth_arch_theme() {
   fi
 
   tmp_dir="$(mktemp -d)"
-  trap 'rm -rf "$tmp_dir"' RETURN
   metadata="$tmp_dir/plymouth-theme.xml"
   archive="$tmp_dir/$PLYMOUTH_ARCH_THEME.zip"
 
@@ -270,6 +282,7 @@ install_plymouth_arch_theme() {
   curl -fL "$download_link" -o "$archive"
   sudo rm -rf "$theme_dir"
   sudo unzip -q "$archive" -d /usr/share/plymouth/themes/
+  rm -rf "$tmp_dir"
   [[ -f "$theme_file" ]] || die "installed Plymouth theme is missing: $theme_file"
 }
 

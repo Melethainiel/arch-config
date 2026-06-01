@@ -58,7 +58,7 @@ Le script active `iwd` et desactive `NetworkManager` et `wpa_supplicant` si ces 
 
 ## Plymouth
 
-Le script installe `plymouth`, `cantarell-fonts`, telecharge le theme Arch `arch-mac-style` depuis <https://www.gnome-look.org/p/2106821>, l'installe dans `/usr/share/plymouth/themes/`, ajoute le hook `plymouth` ou `sd-plymouth` dans `/etc/mkinitcpio.conf`, regenere les initramfs avec `mkinitcpio -P`, puis ajoute `quiet splash` aux entrees systemd-boot presentes dans `/boot/loader/entries` ou a `GRUB_CMDLINE_LINUX_DEFAULT` si GRUB est utilise.
+Le script installe `plymouth`, `cantarell-fonts`, telecharge le theme Arch `arch-mac-style` depuis <https://www.gnome-look.org/p/2106821>, l'installe dans `/usr/share/plymouth/themes/`, ajoute le hook `plymouth` ou `sd-plymouth` dans `/etc/mkinitcpio.conf`, regenere les initramfs/UKI avec `mkinitcpio -P`, puis ajoute `quiet splash` aux entrees systemd-boot presentes dans `/boot/loader/entries`, a `/etc/kernel/cmdline` pour les UKI systemd-stub, ou a `GRUB_CMDLINE_LINUX_DEFAULT` si GRUB est utilise.
 
 Avec SDDM, l'installateur active `sddm-plymouth.service` quand l'unite existe afin de garder une transition propre entre le splash et l'ecran de connexion.
 
