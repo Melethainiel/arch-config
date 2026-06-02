@@ -18,6 +18,12 @@ else
   printf 'Voxtype model already installed: %s\n' "$model"
 fi
 
+if sudo voxtype setup gpu --enable >/dev/null 2>&1; then
+  printf 'Voxtype GPU backend enabled.\n'
+else
+  printf 'Voxtype GPU backend could not be enabled automatically; keeping current backend.\n'
+fi
+
 systemctl --user enable voxtype.service >/dev/null 2>&1 || true
 systemctl --user restart voxtype.service >/dev/null 2>&1 || true
 

@@ -567,6 +567,12 @@ configure_voxtype() {
 
   command -v voxtype >/dev/null 2>&1 || return 0
 
+  if sudo voxtype setup gpu --enable >/dev/null 2>&1; then
+    printf 'Voxtype GPU backend enabled.\n'
+  else
+    printf 'Voxtype GPU backend could not be enabled automatically; keeping current backend.\n'
+  fi
+
   systemctl --user enable voxtype.service >/dev/null 2>&1 || true
   systemctl --user restart voxtype.service >/dev/null 2>&1 || true
 
