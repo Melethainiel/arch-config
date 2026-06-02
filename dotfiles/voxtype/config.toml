@@ -1,8 +1,11 @@
 # Voxtype is controlled by Hyprland keybindings so it does not need evdev/input permissions.
 state_file = "auto"
+engine = "whisper"
 
 [hotkey]
 enabled = false
+key = "HOME"
+mode = "push_to_talk"
 
 [audio]
 device = "default"
@@ -14,13 +17,53 @@ model = "large-v3-turbo"
 language = "fr"
 translate = false
 on_demand_loading = true
+mode = "local"
+flash_attention = false
+gpu_isolation = false
 
 [output]
 mode = "type"
 fallback_to_clipboard = true
 type_delay_ms = 0
+auto_submit = false
+shift_enter_newlines = false
+pre_type_delay_ms = 0
 
 [output.notification]
 on_recording_start = false
 on_recording_stop = false
 on_transcription = true
+show_engine_icon = false
+
+[text]
+spoken_punctuation = false
+smart_auto_submit = false
+
+[text.replacements]
+BIMU = "bimflux"
+IMFLU = "bimflux"
+
+[meeting]
+enabled = false
+
+[meeting.diarization]
+enabled = false
+
+[meeting.audio]
+source = "mic"
+
+[osd]
+enabled = false
+frontend = "gtk4"
+position = "bottom-center"
+width_px = 400
+height_px = 40
+margin_px = 24
+top_margin = 0.85
+opacity = 0.95
+waveform_window_secs = 3.0
+peak_decay_db_per_sec = 6.0
+waveform_gain = 10.0
+
+[status]
+icon_theme = "emoji"
