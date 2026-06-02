@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
-import Quickshell.Services.SystemTray
-import Quickshell.Widgets
+import "components"
 
 ShellRoot {
   id: root
@@ -16,14 +14,7 @@ ShellRoot {
     { "id": 5, "label": "5" },
     { "id": 6, "label": "6" }
   ]
-
-  function run(command) {
-    Quickshell.execDetached(command)
-  }
-
-  function runShell(command) {
-    Quickshell.execDetached(["sh", "-c", command])
-  }
+  property string fontFamily: "JetBrainsMono Nerd Font"
 
   function parseJson(text, fallback) {
     try {
@@ -34,378 +25,6 @@ ShellRoot {
   }
 
   Theme { id: theme }
-
-  component CommandPoller: Item {
-    id: poller
-
-    property var command: []
-    property int interval: 1000
-    property string text: ""
-
-    visible: false
-
-    function refresh() {
-      if (!process.running)
-        process.exec(poller.command)
-    }
-
-    Component.onCompleted: refresh()
-
-    Timer {
-      interval: poller.interval
-      repeat: true
-      running: true
-      triggeredOnStart: false
-      onTriggered: poller.refresh()
-    }
-
-    Process {
-      id: process
-      command: poller.command
-      stdout: StdioCollector {
-        onStreamFinished: poller.text = text.trim()
-      }
-    }
-  }
-
-  component Bubble: Rectangle {
-    id: bubble
-
-    property alias label: bubbleText.text
-    property color labelColor: theme.text
-    property int horizontalPadding: 12
-    property int minWidth: 0
-    property int textPixelSize: 13
-    property bool bold: false
-
-    implicitWidth: Math.max(minWidth, bubbleText.implicitWidth + horizontalPadding * 2)
-    implicitHeight: 34
-    radius: 999
-    color: theme.bg
-
-    Text {
-      id: bubbleText
-      anchors.centerIn: parent
-      color: bubble.labelColor
-      font.family: "JetBrainsMono Nerd Font, Font Awesome 6 Free, Noto Sans"
-      font.pixelSize: bubble.textPixelSize
-      font.bold: bubble.bold
-      verticalAlignment: Text.AlignVCenter
-      elide: Text.ElideRight
-    }
-  }
-
-  component ActionBubble: Bubble {
-    id: actionBubble
-
-    property var command: []
-    property string shellCommand: ""
-
-    MouseArea {
-      anchors.fill: parent
-      cursorShape: Qt.PointingHandCursor
-      onClicked: actionBubble.shellCommand.length > 0 ? root.runShell(actionBubble.shellCommand) : root.run(actionBubble.command)
-    }
-  }
-
-  component VoxTypeIndicator: Rectangle {
-    id: voxIndicator
-
-    property var status: ({})
-    property string statusClass: String(status.class || "")
-    property bool recording: statusClass.indexOf("record") >= 0
-    property bool transcribing: statusClass.indexOf("transcrib") >= 0
-    property bool unavailable: statusClass === "missing" || statusClass === "setup" || statusClass === "stopped"
-    property bool active: recording || transcribing
-
-    implicitWidth: unavailable ? 92 : 34
-    implicitHeight: active ? 79 : 34
-    color: "transparent"
-
-    Behavior on implicitWidth { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-    Behavior on implicitHeight { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-
-    Rectangle {
-      id: voxBubble
-      anchors.horizontalCenter: parent.horizontalCenter
-      y: 0
-      width: voxIndicator.unavailable ? parent.width : 34
-      height: 34
-      radius: 999
-      color: theme.bg
-
-      Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-      Behavior on color { ColorAnimation { duration: 180 } }
-    }
-
-    Text {
-      id: voxIcon
-      anchors.horizontalCenter: parent.horizontalCenter
-      y: 9
-      text: voxIndicator.unavailable ? (voxIndicator.statusClass === "setup" ? " setup" : voxIndicator.statusClass === "missing" ? " missing" : " off") : ""
-      color: voxIndicator.unavailable ? theme.muted : voxIndicator.transcribing ? theme.tertiary : theme.primary
-      font.family: "JetBrainsMono Nerd Font"
-      font.pixelSize: voxIndicator.unavailable ? 13 : 14
-      verticalAlignment: Text.AlignVCenter
-
-      Behavior on color { ColorAnimation { duration: 180 } }
-    }
-
-    Rectangle {
-      id: voxActivity
-      anchors.horizontalCenter: parent.horizontalCenter
-      y: 36
-      width: 82
-      height: 40
-      radius: 12
-      clip: true
-      opacity: voxIndicator.active ? 1 : 0
-      color: Qt.rgba(theme.bg.r, theme.bg.g, theme.bg.b, 1)
-      border.width: 1
-      border.color: voxIndicator.recording ? Qt.rgba(theme.primary.r, theme.primary.g, theme.primary.b, 0.52) : Qt.rgba(theme.tertiary.r, theme.tertiary.g, theme.tertiary.b, 0.52)
-      scale: voxIndicator.active ? 1 : 0.68
-
-      Behavior on opacity { NumberAnimation { duration: 140 } }
-      Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
-
-      Row {
-        anchors.centerIn: parent
-        spacing: 3
-
-        Repeater {
-          model: 5
-
-          Rectangle {
-            id: voxWave
-            width: voxIndicator.transcribing ? 6 : 5
-            height: voxIndicator.transcribing ? 6 : 10 + (index % 3) * 6
-            radius: 999
-            color: voxIndicator.transcribing ? theme.tertiary : theme.primary
-            opacity: voxIndicator.active ? 1 : 0
-            transformOrigin: Item.Center
-
-            SequentialAnimation on scale {
-              running: voxIndicator.recording
-              loops: Animation.Infinite
-              PauseAnimation { duration: index * 70 }
-              NumberAnimation { to: 1.35; duration: 220; easing.type: Easing.InOutSine }
-              NumberAnimation { to: 0.75; duration: 260; easing.type: Easing.InOutSine }
-            }
-
-            SequentialAnimation on opacity {
-              running: voxIndicator.transcribing
-              loops: Animation.Infinite
-              PauseAnimation { duration: index * 90 }
-              NumberAnimation { to: 0.35; duration: 180; easing.type: Easing.InOutSine }
-              NumberAnimation { to: 1; duration: 180; easing.type: Easing.InOutSine }
-            }
-
-            Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            Behavior on height { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            Behavior on color { ColorAnimation { duration: 160 } }
-          }
-        }
-      }
-    }
-
-    MouseArea {
-      anchors.fill: parent
-      cursorShape: Qt.PointingHandCursor
-      onClicked: root.runShell("ghostty --class=com.mitchellh.ghostty.voxtype -e bash -lc \"arch-setup-voxtype; read -n1 -r -p 'Press any key to close'\"")
-    }
-  }
-
-  component IconTextBubble: Rectangle {
-    id: iconTextBubble
-
-    property string icon: ""
-    property string label: ""
-    property color iconColor: theme.text
-    property color labelColor: theme.text
-    property var command: []
-    property string shellCommand: ""
-    property int horizontalPadding: 12
-    property int minWidth: 0
-    property bool scrollLabel: false
-    property int labelMaxWidth: 110
-
-    implicitWidth: Math.max(minWidth, iconTextRow.implicitWidth + horizontalPadding * 2)
-    implicitHeight: 34
-    radius: 999
-    color: theme.bg
-
-    Row {
-      id: iconTextRow
-      anchors.centerIn: parent
-      spacing: 6
-
-      Text {
-        text: iconTextBubble.icon
-        color: iconTextBubble.iconColor
-        font.family: "JetBrainsMono Nerd Font"
-        font.pixelSize: 13
-        verticalAlignment: Text.AlignVCenter
-      }
-
-      Item {
-        id: labelClip
-
-        property bool overflow: iconTextBubble.scrollLabel && labelText.implicitWidth > iconTextBubble.labelMaxWidth
-
-        implicitWidth: overflow ? iconTextBubble.labelMaxWidth : labelText.implicitWidth
-        implicitHeight: labelText.implicitHeight
-        clip: overflow
-
-        onOverflowChanged: labelText.x = 0
-        onImplicitWidthChanged: labelText.x = 0
-
-        Text {
-          id: labelText
-
-          anchors.verticalCenter: parent.verticalCenter
-          text: iconTextBubble.label
-          color: iconTextBubble.labelColor
-          font.family: "JetBrainsMono Nerd Font"
-          font.pixelSize: 13
-          verticalAlignment: Text.AlignVCenter
-        }
-
-        SequentialAnimation {
-          running: labelClip.overflow
-          loops: Animation.Infinite
-
-          PropertyAction { target: labelText; property: "x"; value: 0 }
-          PauseAnimation { duration: 900 }
-          NumberAnimation {
-            target: labelText
-            property: "x"
-            to: -Math.max(0, labelText.implicitWidth - labelClip.implicitWidth)
-            duration: Math.max(1200, (labelText.implicitWidth - labelClip.implicitWidth) * 45)
-            easing.type: Easing.InOutSine
-          }
-          PauseAnimation { duration: 900 }
-        }
-      }
-    }
-
-    MouseArea {
-      anchors.fill: parent
-      cursorShape: iconTextBubble.shellCommand.length > 0 || iconTextBubble.command.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-      onClicked: {
-        if (iconTextBubble.shellCommand.length > 0)
-          root.runShell(iconTextBubble.shellCommand)
-        else if (iconTextBubble.command.length > 0)
-          root.run(iconTextBubble.command)
-      }
-    }
-  }
-
-  component WorkspaceButton: Rectangle {
-    id: workspaceButton
-
-    required property int workspaceId
-    required property string workspaceLabel
-    property bool active: activeWorkspace.text === String(workspaceId)
-    property string workspaceIcon: workspaceLabel.indexOf(" ") > 0 ? workspaceLabel.split(" ")[0] : ""
-    property string workspaceText: workspaceLabel.indexOf(" ") > 0 ? workspaceLabel.split(" ").slice(1).join(" ") : workspaceLabel
-
-    Layout.preferredWidth: active ? 50 : 40
-    Layout.preferredHeight: 34
-    radius: 999
-    color: "transparent"
-
-    Rectangle {
-      anchors.centerIn: parent
-      width: parent.active ? 44 : 34
-      height: 20
-      radius: 999
-      color: parent.active ? theme.primary : theme.surfaceDim
-
-      Row {
-        anchors.centerIn: parent
-        spacing: 3
-
-        Text {
-          visible: workspaceButton.workspaceIcon.length > 0
-          text: workspaceButton.workspaceIcon
-          color: workspaceButton.active ? theme.primaryText : theme.muted
-          font.family: "JetBrainsMono Nerd Font"
-          font.pixelSize: 13
-          verticalAlignment: Text.AlignVCenter
-        }
-
-        Text {
-          text: workspaceButton.workspaceText
-          color: workspaceButton.active ? theme.primaryText : theme.muted
-          font.family: "JetBrainsMono Nerd Font"
-          font.pixelSize: 13
-          verticalAlignment: Text.AlignVCenter
-        }
-      }
-    }
-
-    MouseArea {
-      anchors.fill: parent
-      cursorShape: Qt.PointingHandCursor
-      onClicked: root.run(["hyprctl", "dispatch", "workspace", String(workspaceButton.workspaceId)])
-    }
-  }
-
-  component TrayBubble: Rectangle {
-    id: trayBubble
-
-    property var parentWindow
-
-    implicitHeight: 34
-    implicitWidth: trayRow.implicitWidth + 16
-    radius: 999
-    color: theme.bg
-    visible: SystemTray.items.values.length > 0
-
-    Row {
-      id: trayRow
-      anchors.centerIn: parent
-      spacing: 4
-
-      Repeater {
-        model: SystemTray.items
-
-        MouseArea {
-          id: trayItem
-          required property var modelData
-
-          width: 24
-          height: 34
-          acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-          cursorShape: Qt.PointingHandCursor
-          hoverEnabled: true
-
-          Rectangle {
-            anchors.fill: parent
-            radius: 999
-            color: trayItem.containsMouse ? theme.surfaceHover : "transparent"
-          }
-
-          IconImage {
-            anchors.centerIn: parent
-            source: trayItem.modelData.icon
-            implicitSize: 16
-          }
-
-          onClicked: function(mouse) {
-            if (mouse.button === Qt.RightButton && modelData.hasMenu)
-              modelData.display(trayBubble.parentWindow, x, y + height)
-            else if (mouse.button === Qt.MiddleButton)
-              modelData.secondaryActivate()
-            else if (modelData.onlyMenu && modelData.hasMenu)
-              modelData.display(trayBubble.parentWindow, x, y + height)
-            else
-              modelData.activate()
-          }
-        }
-      }
-    }
-  }
 
   CommandPoller {
     id: activeWorkspace
@@ -484,6 +103,12 @@ ShellRoot {
       color: "transparent"
       implicitHeight: 86
       exclusiveZone: 44
+      mask: Region {
+        x: 0
+        y: 0
+        width: barWindow.width
+        height: barWindow.exclusiveZone
+      }
       anchors {
         top: true
         left: true
@@ -501,6 +126,8 @@ ShellRoot {
           spacing: 8
 
           Bubble {
+            colors: theme
+            fontFamily: root.fontFamily
             label: ""
             minWidth: 58
             textPixelSize: 19
@@ -510,10 +137,14 @@ ShellRoot {
           }
 
           VoxTypeIndicator {
+            colors: theme
+            fontFamily: root.fontFamily
             status: root.parseJson(voxtype.text, "{}")
           }
 
           ActionBubble {
+            colors: theme
+            fontFamily: root.fontFamily
             visible: mediaStatus.text === "Playing"
             minWidth: 260
             horizontalPadding: 10
@@ -522,6 +153,8 @@ ShellRoot {
           }
 
           Bubble {
+            colors: theme
+            fontFamily: root.fontFamily
             minWidth: 74
             label: weather.text || "meteo"
             labelColor: theme.secondary
@@ -533,6 +166,8 @@ ShellRoot {
           spacing: 8
 
           Bubble {
+            colors: theme
+            fontFamily: root.fontFamily
             label: clock.date.toLocaleString(Qt.locale("fr_FR"), "ddd HH:mm")
             bold: true
           }
@@ -552,8 +187,11 @@ ShellRoot {
                 model: root.workspaces
                 WorkspaceButton {
                   required property var modelData
+                  colors: theme
+                  fontFamily: root.fontFamily
                   workspaceId: modelData.id
                   workspaceLabel: modelData.label
+                  activeWorkspaceText: activeWorkspace.text
                 }
               }
             }
@@ -564,9 +202,14 @@ ShellRoot {
           anchors.right: parent.right
           spacing: 8
 
-          TrayBubble { parentWindow: barWindow }
+          TrayBubble {
+            colors: theme
+            parentWindow: barWindow
+          }
 
           IconTextBubble {
+            colors: theme
+            fontFamily: root.fontFamily
             visible: volume.text.length > 0
             icon: ""
             label: volume.text
@@ -574,6 +217,8 @@ ShellRoot {
           }
 
           IconTextBubble {
+            colors: theme
+            fontFamily: root.fontFamily
             icon: network.text === "ETH" ? "󰈀" : ""
             label: network.text === "ETH" ? "ethernet" : network.text === "OFF" || network.text.length === 0 ? "off" : network.text
             shellCommand: "ghostty --class=com.mitchellh.ghostty.impala -e impala"
@@ -583,6 +228,8 @@ ShellRoot {
             property string bluetoothState: bluetooth.text.split("|")[0] || "off"
             property string bluetoothLabel: bluetooth.text.split("|")[1] || "off"
 
+            colors: theme
+            fontFamily: root.fontFamily
             icon: bluetoothState === "connected" ? "󰂱" : bluetoothState === "on" ? "󰂯" : "󰂲"
             iconColor: bluetoothState === "connected" ? theme.secondary : bluetoothState === "on" ? theme.primary : theme.muted
             label: bluetoothLabel
@@ -592,12 +239,16 @@ ShellRoot {
           }
 
           IconTextBubble {
+            colors: theme
+            fontFamily: root.fontFamily
             visible: battery.text.length > 0
             icon: battery.text.split("|")[0] || ""
             label: battery.text.split("|")[1] || ""
           }
 
           IconTextBubble {
+            colors: theme
+            fontFamily: root.fontFamily
             icon: Number(notifications.text || "0") > 0 ? "󱅫" : ""
             label: Number(notifications.text || "0") > 0 ? notifications.text : ""
             shellCommand: "swaync-client -t -sw"
