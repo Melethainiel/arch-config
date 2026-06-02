@@ -226,6 +226,8 @@ ShellRoot {
     property string shellCommand: ""
     property int horizontalPadding: 12
     property int minWidth: 0
+    property bool scrollLabel: false
+    property int labelMaxWidth: 110
 
     implicitWidth: Math.max(minWidth, iconTextRow.implicitWidth + horizontalPadding * 2)
     implicitHeight: 34
@@ -245,12 +247,44 @@ ShellRoot {
         verticalAlignment: Text.AlignVCenter
       }
 
-      Text {
-        text: iconTextBubble.label
-        color: iconTextBubble.labelColor
-        font.family: "JetBrainsMono Nerd Font"
-        font.pixelSize: 13
-        verticalAlignment: Text.AlignVCenter
+      Item {
+        id: labelClip
+
+        property bool overflow: iconTextBubble.scrollLabel && labelText.implicitWidth > iconTextBubble.labelMaxWidth
+
+        implicitWidth: overflow ? iconTextBubble.labelMaxWidth : labelText.implicitWidth
+        implicitHeight: labelText.implicitHeight
+        clip: overflow
+
+        onOverflowChanged: labelText.x = 0
+        onImplicitWidthChanged: labelText.x = 0
+
+        Text {
+          id: labelText
+
+          anchors.verticalCenter: parent.verticalCenter
+          text: iconTextBubble.label
+          color: iconTextBubble.labelColor
+          font.family: "JetBrainsMono Nerd Font"
+          font.pixelSize: 13
+          verticalAlignment: Text.AlignVCenter
+        }
+
+        SequentialAnimation {
+          running: labelClip.overflow
+          loops: Animation.Infinite
+
+          PropertyAction { target: labelText; property: "x"; value: 0 }
+          PauseAnimation { duration: 900 }
+          NumberAnimation {
+            target: labelText
+            property: "x"
+            to: -Math.max(0, labelText.implicitWidth - labelClip.implicitWidth)
+            duration: Math.max(1200, (labelText.implicitWidth - labelClip.implicitWidth) * 45)
+            easing.type: Easing.InOutSine
+          }
+          PauseAnimation { duration: 900 }
+        }
       }
     }
 
@@ -417,6 +451,12 @@ ShellRoot {
   }
 
   CommandPoller {
+    id: bluetooth
+    interval: 5000
+    command: ["sh", "-c", "if ! command -v bluetoothctl >/dev/null 2>&1; then printf 'missing|off'; exit 0; fi; if ! bluetoothctl show 2>/dev/null | grep -q 'Powered: yes'; then printf 'off|off'; exit 0; fi; labels=$(bluetoothctl devices Connected 2>/dev/null | while IFS= read -r line; do rest=${line#Device }; mac=${rest%% *}; name=${rest#* }; [ -n \"$mac\" ] && [ \"$mac\" != \"$rest\" ] || continue; info=$(bluetoothctl info \"$mac\" 2>/dev/null); pct=$(printf '%s' \"$info\" | awk -F'[()]' '/Battery Percentage/ {print $2; exit}'); if [ -n \"$pct\" ]; then printf '%s %s%%\\n' \"$name\" \"$pct\"; else printf '%s\\n' \"$name\"; fi; done | paste -sd '/' -); if [ -n \"$labels\" ]; then printf 'connected|%s' \"$labels\"; else printf 'on|on'; fi"]
+  }
+
+  CommandPoller {
     id: battery
     interval: 5000
     command: ["sh", "-c", "for dev in $(upower -e 2>/dev/null | grep battery); do info=$(upower -i \"$dev\"); printf '%s' \"$info\" | grep -q '^[[:space:]]*power supply:[[:space:]]*yes' || continue; pct=$(printf '%s' \"$info\" | sed -n 's/^[[:space:]]*percentage:[[:space:]]*//p' | head -n1); state=$(printf '%s' \"$info\" | sed -n 's/^[[:space:]]*state:[[:space:]]*//p' | head -n1); [ -z \"$pct\" ] && continue; case \"$state\" in charging) icon= ;; fully-charged) icon= ;; discharging) icon= ;; *) icon= ;; esac; printf '%s|%s' \"$icon\" \"$pct\"; break; done"]
@@ -537,6 +577,18 @@ ShellRoot {
             icon: network.text === "ETH" ? "󰈀" : ""
             label: network.text === "ETH" ? "ethernet" : network.text === "OFF" || network.text.length === 0 ? "off" : network.text
             shellCommand: "ghostty --class=com.mitchellh.ghostty.impala -e impala"
+          }
+
+          IconTextBubble {
+            property string bluetoothState: bluetooth.text.split("|")[0] || "off"
+            property string bluetoothLabel: bluetooth.text.split("|")[1] || "off"
+
+            icon: bluetoothState === "connected" ? "󰂱" : bluetoothState === "on" ? "󰂯" : "󰂲"
+            iconColor: bluetoothState === "connected" ? theme.secondary : bluetoothState === "on" ? theme.primary : theme.muted
+            label: bluetoothLabel
+            scrollLabel: bluetoothState === "connected"
+            labelMaxWidth: 116
+            shellCommand: "ghostty --class=com.mitchellh.ghostty.bluetui -e bluetui"
           }
 
           IconTextBubble {

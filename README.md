@@ -46,6 +46,12 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 
 Le script doit etre lance avec l'utilisateur normal, pas avec `root`.
 
+Pour recopier uniquement la config Quickshell sans lancer l'installation complete :
+
+```bash
+./install.sh quickshell
+```
+
 ## Reseau
 
 La stack retenue est `iwd + Impala`.

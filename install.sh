@@ -392,6 +392,22 @@ cleanup_legacy_hyprland_conf() {
     "$hypr_dir/theme.conf"
 }
 
+install_quickshell_dotfiles() {
+  local overwrite_theme="${1:-0}"
+
+  install -d "$HOME/.config/quickshell"
+  if [[ "$overwrite_theme" -eq 1 ]]; then
+    cp -R "$DOTFILES_DIR/quickshell/." "$HOME/.config/quickshell/"
+  else
+    find "$DOTFILES_DIR/quickshell" -mindepth 1 -maxdepth 1 \
+      ! -name 'Theme.qml' \
+      -exec cp -R -t "$HOME/.config/quickshell" {} +
+    if [[ ! -f "$HOME/.config/quickshell/Theme.qml" ]]; then
+      cp -R "$DOTFILES_DIR/quickshell/Theme.qml" "$HOME/.config/quickshell/"
+    fi
+  fi
+}
+
 install_dotfiles() {
   local overwrite_theme=0
 
@@ -413,17 +429,7 @@ install_dotfiles() {
     cp -R "$DOTFILES_DIR/autostart/." "$HOME/.config/autostart/"
   fi
 
-  install -d "$HOME/.config/quickshell"
-  if [[ "$overwrite_theme" -eq 1 ]]; then
-    cp -R "$DOTFILES_DIR/quickshell/." "$HOME/.config/quickshell/"
-  else
-    find "$DOTFILES_DIR/quickshell" -mindepth 1 -maxdepth 1 \
-      ! -name 'Theme.qml' \
-      -exec cp -R -t "$HOME/.config/quickshell" {} +
-    if [[ ! -f "$HOME/.config/quickshell/Theme.qml" ]]; then
-      cp -R "$DOTFILES_DIR/quickshell/Theme.qml" "$HOME/.config/quickshell/"
-    fi
-  fi
+  install_quickshell_dotfiles "$overwrite_theme"
 
   if [[ -d "$DOTFILES_DIR/swaync" ]]; then
     install -d "$HOME/.config/swaync"
@@ -626,7 +632,37 @@ restart_session_components() {
   fi
 }
 
+usage() {
+  cat <<EOF
+Usage: $0 [full|quickshell]
+
+Modes:
+  full        Run the complete Arch setup. This is the default.
+  quickshell  Only copy dotfiles/quickshell to ~/.config/quickshell.
+EOF
+}
+
 main() {
+  local mode="${1:-full}"
+
+  case "$mode" in
+    full|install) ;;
+    quickshell)
+      require_user
+      install_quickshell_dotfiles 0
+      printf 'Quickshell config copied to %s/.config/quickshell.\n' "$HOME"
+      return 0
+      ;;
+    -h|--help|help)
+      usage
+      return 0
+      ;;
+    *)
+      usage >&2
+      die "unknown install mode: $mode"
+      ;;
+  esac
+
   require_arch
   require_user
 
