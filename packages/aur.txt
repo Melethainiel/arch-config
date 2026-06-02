@@ -1,6 +1,4 @@
-aylurs-gtk-shell-git
 brave-bin
-libastal-tray-git
 opencode-bin
 pixie-sddm-git
 visual-studio-code-bin

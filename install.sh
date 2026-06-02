@@ -353,7 +353,7 @@ configure_shell_path() {
 should_overwrite_applied_theme() {
   local answer
 
-  if [[ ! -f "$HOME/.config/ags/theme.css" ]] \
+  if [[ ! -f "$HOME/.config/quickshell/Theme.qml" ]] \
     && [[ ! -f "$HOME/.config/swaync/theme.css" ]] \
     && [[ ! -f "$HOME/.config/hypr/theme.lua" ]] \
     && [[ ! -f "$HOME/.config/hypr/theme.conf" ]] \
@@ -413,18 +413,16 @@ install_dotfiles() {
     cp -R "$DOTFILES_DIR/autostart/." "$HOME/.config/autostart/"
   fi
 
-  install -d "$HOME/.config/ags"
+  install -d "$HOME/.config/quickshell"
   if [[ "$overwrite_theme" -eq 1 ]]; then
-    find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
-      ! -name '@girs' \
-      ! -name 'node_modules' \
-      -exec cp -R -t "$HOME/.config/ags" {} +
+    cp -R "$DOTFILES_DIR/quickshell/." "$HOME/.config/quickshell/"
   else
-    find "$DOTFILES_DIR/ags" -mindepth 1 -maxdepth 1 \
-      ! -name '@girs' \
-      ! -name 'node_modules' \
-      ! -name 'theme.css' \
-      -exec cp -R -t "$HOME/.config/ags" {} +
+    find "$DOTFILES_DIR/quickshell" -mindepth 1 -maxdepth 1 \
+      ! -name 'Theme.qml' \
+      -exec cp -R -t "$HOME/.config/quickshell" {} +
+    if [[ ! -f "$HOME/.config/quickshell/Theme.qml" ]]; then
+      cp -R "$DOTFILES_DIR/quickshell/Theme.qml" "$HOME/.config/quickshell/"
+    fi
   fi
 
   if [[ -d "$DOTFILES_DIR/swaync" ]]; then
@@ -598,18 +596,17 @@ enable_user_services() {
 restart_session_components() {
   local answer
 
-  read -r -p "Restart AGS and reload Hyprland now? [Y/n] " answer
+  read -r -p "Restart Quickshell and reload Hyprland now? [Y/n] " answer
 
   case "$answer" in
     ""|[Yy]|[Yy][Ee][Ss]) ;;
     *) return ;;
   esac
 
-  if command -v ags >/dev/null 2>&1; then
-    ags quit --instance arch-shell >/dev/null 2>&1 || true
-    pkill -x ags >/dev/null 2>&1 || true
+  if command -v quickshell >/dev/null 2>&1; then
+    pkill -x quickshell >/dev/null 2>&1 || true
     sleep 1
-    ags run "$HOME/.config/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
+    quickshell -c "$HOME/.config/quickshell/shell.qml" >/tmp/arch-config-quickshell.log 2>&1 &
   fi
 
   if command -v swaync >/dev/null 2>&1; then

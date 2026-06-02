@@ -1,5 +1,6 @@
 dotfiles/ags/@girs/
 dotfiles/ags/node_modules/
+dotfiles/quickshell/.qmlls.ini
 
 # IA files
 .opencode/

@@ -3,9 +3,9 @@ fallback_color = "#33ccff"
 prefer = "closest-to-fallback"
 contrast = 0.5
 
-[templates.ags]
-input_path = '~/.config/matugen/templates/ags-theme.css'
-output_path = '~/.config/ags/theme.css'
+[templates.quickshell]
+input_path = '~/.config/matugen/templates/quickshell-theme.qml'
+output_path = '~/.config/quickshell/Theme.qml'
 
 [templates.swaync]
 input_path = '~/.config/matugen/templates/swaync-theme.css'

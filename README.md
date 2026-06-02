@@ -10,13 +10,9 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 .
 ├── install.sh
 ├── dotfiles/
-│   ├── ags/
-│   │   ├── app.tsx
-│   │   ├── env.d.ts
-│   │   ├── lib/
-│   │   ├── widgets/
-│   │   ├── tsconfig.json
-│   │   └── style.css
+│   ├── quickshell/
+│   │   ├── shell.qml
+│   │   └── Theme.qml
 │   ├── hypr/
 │   ├── fastfetch/
 │   ├── matugen/
@@ -38,7 +34,7 @@ L'objectif est d'avoir le meme socle sur chaque PC sans construire un installate
 - `packages/core.txt` contient le socle commun de tous les PC, dont `mise` et `zoxide`. L'installation configure aussi Node.js LTS en global via `mise`.
 - `packages/desktop.txt` contient la session Hyprland, Waybar en fallback, iwd/Impala, Plymouth, polices et apps desktop de base comme GNOME Disks et Discord.
 - `packages/gaming.txt` contient Steam et Gamescope. Le script active `[multilib]` et detecte les paquets Vulkan/lib32 Intel ou AMD comme Omarchy.
-- `packages/aur.txt` contient les paquets AUR, notamment AGS via `aylurs-gtk-shell-git` et OpenCode.
+- `packages/aur.txt` contient les paquets AUR, notamment OpenCode et les paquets non disponibles dans les depots Arch.
 - `packages/dev.txt` contient les outils dev optionnels comme Docker.
 - Howdy est optionnel, car il depend d'une camera IR. Il se configure depuis le menu `Setup > Security > Face unlock`.
 
@@ -100,29 +96,27 @@ La configuration camera reste specifique a chaque machine. Sur le Zenbook, le fl
 /dev/v4l/by-path/pci-0000:00:14.0-usb-0:5:1.2-video-index0
 ```
 
-## AGS
+## Quickshell
 
-Le bon paquet AGS/Aylur est :
+Le paquet Quickshell est disponible dans les depots Arch :
 
 ```text
-aylurs-gtk-shell-git
+quickshell
 ```
 
-Ne pas installer `aur/ags`: c'est Adventure Game Studio.
+Waybar reste installe comme fallback tant que la barre Quickshell n'est pas validee sur la machine.
 
-Waybar reste installe comme fallback tant que la barre AGS n'est pas validee sur la machine.
-
-Pour que VS Code resolve les imports AGS dans `dotfiles/ags`, lancer si besoin :
+Pour que le language server QML soit configure par Quickshell, creer si besoin un fichier vide a cote de la config :
 
 ```bash
-ags types --directory dotfiles/ags --update
+touch dotfiles/quickshell/.qmlls.ini
 ```
 
-Cette commande genere `dotfiles/ags/@girs` et `dotfiles/ags/node_modules`, ignores par Git.
+Ce fichier est ignore par Git car Quickshell le remplit avec des chemins locaux.
 
 ## Barre
 
-La barre active est AGS (`dotfiles/ags`). Elle est composee de bulles separees en haut : logo Arch, lecture en cours et meteo a gauche, date/heure et workspaces au centre, volume/reseau/batterie/notifications a droite.
+La barre active est Quickshell (`dotfiles/quickshell`). Elle reprend le visuel AGS avec des bulles separees en haut : logo Arch, Voxtype, lecture en cours et meteo a gauche, date/heure et workspaces au centre, tray, volume/reseau/batterie/notifications a droite.
 
 ## Menu Systeme
 
@@ -134,7 +128,7 @@ Les scripts de `scripts/` sont installes dans `~/.local/bin`.
 
 ## Themes
 
-`matugen` genere les couleurs depuis un wallpaper pour AGS, SwayNC, Hyprland, Ghostty, Fuzzel, GTK et VS Code (via l'extension Material Code). La configuration Hyprland 0.55+ est en Lua avec `dotfiles/hypr/hyprland.lua` et ses modules.
+`matugen` genere les couleurs depuis un wallpaper pour Quickshell, SwayNC, Hyprland, Ghostty, Fuzzel, GTK et VS Code (via l'extension Material Code). La configuration Hyprland 0.55+ est en Lua avec `dotfiles/hypr/hyprland.lua` et ses modules.
 
 Apres installation, lancer :
 
@@ -142,13 +136,13 @@ Apres installation, lancer :
 theme-switch /chemin/vers/wallpaper.jpg
 ```
 
-Le repo inclut aussi des presets fixes. Pour appliquer Nord sur Ghostty, Hyprland, Fuzzel, AGS, SwayNC, GTK, VS Code, OpenCode et son premier wallpaper :
+Le repo inclut aussi des presets fixes. Pour appliquer Nord sur Ghostty, Hyprland, Fuzzel, Quickshell, SwayNC, GTK, VS Code, OpenCode et son premier wallpaper :
 
 ```bash
 theme-switch nord
 ```
 
-Le script genere les fichiers de theme dans `~/.config/ags`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, ecrit aussi `~/.config/hypr/hyprpaper.conf` pour que le wallpaper persiste au reboot, tente de le synchroniser avec le theme Pixie de SDDM, puis recharge les composants de session. Cote Hyprland, le theme genere est `~/.config/hypr/theme.lua`.
+Le script genere les fichiers de theme dans `~/.config/quickshell`, `~/.config/swaync`, `~/.config/hypr`, `~/.config/ghostty`, `~/.config/fuzzel` et `~/.config/gtk-*`, ecrit aussi `~/.config/hypr/hyprpaper.conf` pour que le wallpaper persiste au reboot, tente de le synchroniser avec le theme Pixie de SDDM, puis recharge les composants de session. Cote Hyprland, le theme genere est `~/.config/hypr/theme.lua`.
 
 ## Shell
 

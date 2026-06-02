@@ -5,6 +5,7 @@ hypridle
 hyprlock
 hyprpaper
 matugen
+quickshell
 xdg-desktop-portal
 xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk

@@ -73,7 +73,7 @@ sync_pixie_sddm_wallpaper() {
 confirm_theme_overwrite() {
   local answer
 
-  if [[ ! -f "$config_home/ags/theme.css" ]] \
+  if [[ ! -f "$config_home/quickshell/Theme.qml" ]] \
     && [[ ! -f "$config_home/swaync/theme.css" ]] \
     && [[ ! -f "$config_home/hypr/theme.lua" ]] \
     && [[ ! -f "$config_home/hypr/theme.conf" ]] \
@@ -97,7 +97,7 @@ confirm_theme_overwrite() {
 
 install_theme_dirs() {
   install -d \
-    "$config_home/ags" \
+    "$config_home/quickshell" \
     "$config_home/swaync" \
     "$config_home/hypr" \
     "$config_home/ghostty" \
@@ -150,11 +150,10 @@ restart_themed_components() {
     gsettings set org.gnome.desktop.interface color-scheme prefer-dark >/dev/null 2>&1 || true
   fi
 
-  if command -v ags >/dev/null 2>&1; then
-    ags quit --instance arch-shell >/dev/null 2>&1 || true
-    pkill -x ags >/dev/null 2>&1 || true
+  if command -v quickshell >/dev/null 2>&1; then
+    pkill -x quickshell >/dev/null 2>&1 || true
     sleep 1
-    ags run "$config_home/ags/app.tsx" >/tmp/arch-config-ags.log 2>&1 &
+    quickshell -c "$config_home/quickshell/shell.qml" >/tmp/arch-config-quickshell.log 2>&1 &
   fi
 
   if command -v swaync >/dev/null 2>&1; then
@@ -179,7 +178,7 @@ apply_theme_preset() {
     exit 0
   fi
 
-  install -Dm644 "$source_dir/ags-theme.css" "$config_home/ags/theme.css"
+  install -Dm644 "$source_dir/quickshell-theme.qml" "$config_home/quickshell/Theme.qml"
   install -Dm644 "$source_dir/swaync-theme.css" "$config_home/swaync/theme.css"
   install -Dm644 "$source_dir/hyprland-theme.lua" "$config_home/hypr/theme.lua"
   rm -f "$config_home/hypr/theme.conf"

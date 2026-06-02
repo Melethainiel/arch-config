@@ -255,7 +255,7 @@ show_config_setup_menu() {
     '  Hypridle' \
     '  Hyprlock' \
     '󰌧  Fuzzel' \
-    '󰍜  AGS' \
+    '󰍜  Quickshell' \
     '󰎟  SwayNC' \
     '󰊠  Ghostty' \
     '  Fastfetch')"
@@ -265,7 +265,7 @@ show_config_setup_menu() {
     *Hypridle) open_config "$HOME/.config/hypr/hypridle.conf" ;;
     *Hyprlock) open_config "$HOME/.config/hypr/hyprlock.conf" ;;
     *Fuzzel) open_config "$HOME/.config/fuzzel/fuzzel.ini" ;;
-    *AGS) open_config "$HOME/.config/ags/app.tsx" ;;
+    *Quickshell) open_config "$HOME/.config/quickshell/shell.qml" ;;
     *SwayNC) open_config "$HOME/.config/swaync/config.json" ;;
     *Ghostty) open_config "$HOME/.config/ghostty/config" ;;
     *Fastfetch) open_config "$HOME/.config/fastfetch/config.jsonc" ;;
