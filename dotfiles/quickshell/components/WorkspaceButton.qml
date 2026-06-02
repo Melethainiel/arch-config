@@ -24,7 +24,7 @@ Rectangle {
     width: parent.active ? 44 : 34
     height: 20
     radius: 999
-    color: parent.active ? colors.primary : colors.surfaceDim
+    color: parent.active ? "transparent" : colors.surfaceDim
 
     Row {
       anchors.centerIn: parent

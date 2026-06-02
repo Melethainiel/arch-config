@@ -24,6 +24,18 @@ ShellRoot {
     }
   }
 
+  function activeWorkspaceIndex() {
+    const currentWorkspace = Number(activeWorkspace.text)
+
+    for (let index = 0; index < workspaces.length; index++) {
+      if (workspaces[index].id === currentWorkspace) {
+        return index
+      }
+    }
+
+    return -1
+  }
+
   Theme { id: theme }
 
   CommandPoller {
@@ -48,7 +60,7 @@ ShellRoot {
   CommandPoller {
     id: weather
     interval: 900000
-    command: ["sh", "-c", "curl -fsS 'https://wttr.in/Saint-Chamond?format=%c+%t' 2>/dev/null || printf 'meteo'"]
+    command: ["sh", "-c", "curl -fsS 'https://api.open-meteo.com/v1/forecast?latitude=45.42&longitude=4.52&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=7&timezone=Europe%2FParis' 2>/dev/null || printf '{}'"]
   }
 
   CommandPoller {
@@ -138,6 +150,7 @@ ShellRoot {
 
           VoxTypeIndicator {
             colors: theme
+            parentWindow: barWindow
             fontFamily: root.fontFamily
             status: root.parseJson(voxtype.text, "{}")
           }
@@ -152,12 +165,12 @@ ShellRoot {
             command: ["playerctl", "play-pause"]
           }
 
-          Bubble {
+          WeatherPopup {
+            id: weatherPopup
             colors: theme
+            parentWindow: barWindow
             fontFamily: root.fontFamily
-            minWidth: 74
-            label: weather.text || "meteo"
-            labelColor: theme.secondary
+            forecast: root.parseJson(weather.text, "{}")
           }
         }
 
@@ -173,10 +186,33 @@ ShellRoot {
           }
 
           Rectangle {
+            id: workspaceBubble
+
+            readonly property int activeIndex: root.activeWorkspaceIndex()
+
             implicitHeight: 34
             implicitWidth: workspaceRow.implicitWidth + 16
             radius: 999
             color: theme.bg
+
+            Rectangle {
+              id: activeWorkspacePill
+
+              visible: workspaceBubble.activeIndex >= 0
+              x: workspaceRow.x + workspaceBubble.activeIndex * 40 + 3
+              anchors.verticalCenter: parent.verticalCenter
+              width: 44
+              height: 20
+              radius: 999
+              color: theme.primary
+
+              Behavior on x {
+                NumberAnimation {
+                  duration: 180
+                  easing.type: Easing.OutCubic
+                }
+              }
+            }
 
             RowLayout {
               id: workspaceRow

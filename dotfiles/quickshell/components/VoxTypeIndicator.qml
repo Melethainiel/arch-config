@@ -5,6 +5,7 @@ Rectangle {
   id: voxIndicator
 
   required property var colors
+  required property var parentWindow
   property string fontFamily: "JetBrainsMono Nerd Font"
   property var status: ({})
   property string statusClass: String(status.class || "")
@@ -12,6 +13,38 @@ Rectangle {
   property bool transcribing: statusClass.indexOf("transcrib") >= 0
   property bool unavailable: statusClass === "missing" || statusClass === "setup" || statusClass === "stopped"
   property bool active: recording || transcribing
+  property bool open: false
+  readonly property color accent: transcribing ? colors.tertiary : unavailable ? colors.muted : colors.primary
+
+  function titleForStatus() {
+    if (recording)
+      return "Voxtype ecoute"
+    if (transcribing)
+      return "Transcription"
+    if (statusClass === "setup")
+      return "Modele manquant"
+    if (statusClass === "missing")
+      return "Voxtype absent"
+    if (statusClass === "stopped")
+      return "Service arrete"
+    return "Voxtype pret"
+  }
+
+  function detailForStatus() {
+    if (String(status.tooltip || "").length > 0)
+      return String(status.tooltip)
+    if (recording)
+      return "Parle, je prends les notes."
+    if (transcribing)
+      return "Whisper transforme l'audio en texte."
+    if (unavailable)
+      return "Ouvre le setup ou verifie le service utilisateur."
+    return "Micro local, transcription locale."
+  }
+
+  function fieldValue(primary, fallback) {
+    return String(primary || fallback)
+  }
 
   implicitWidth: unavailable ? 92 : 34
   implicitHeight: active ? 79 : 34
@@ -109,6 +142,175 @@ Rectangle {
     width: voxBubble.width
     height: voxBubble.height
     cursorShape: Qt.PointingHandCursor
-    onClicked: Quickshell.execDetached(["sh", "-c", "ghostty --class=com.mitchellh.ghostty.voxtype -e bash -lc \"arch-setup-voxtype; read -n1 -r -p 'Press any key to close'\""])
+    onClicked: voxIndicator.open = !voxIndicator.open
+  }
+
+  PopupWindow {
+    id: voxWindow
+
+    visible: voxIndicator.open
+    implicitWidth: 328
+    implicitHeight: 192
+    color: "transparent"
+    grabFocus: true
+
+    anchor.window: voxIndicator.parentWindow
+    anchor.rect.x: Math.round(voxBubble.mapToItem(null, 0, 0).x - 18)
+    anchor.rect.y: Math.round(voxBubble.mapToItem(null, 0, 0).y + 42)
+
+    onVisibleChanged: {
+      if (!visible)
+        voxIndicator.open = false
+    }
+
+    Rectangle {
+      anchors.fill: parent
+      radius: 20
+      color: colors.surface
+      border.width: 1
+      border.color: Qt.rgba(voxIndicator.accent.r, voxIndicator.accent.g, voxIndicator.accent.b, 0.42)
+      clip: true
+
+      Column {
+        anchors.fill: parent
+        anchors.margins: 16
+        spacing: 12
+
+        Row {
+          width: parent.width
+          spacing: 12
+
+          Rectangle {
+            width: 42
+            height: 42
+            radius: 999
+            color: Qt.rgba(voxIndicator.accent.r, voxIndicator.accent.g, voxIndicator.accent.b, 0.16)
+            border.width: 1
+            border.color: Qt.rgba(voxIndicator.accent.r, voxIndicator.accent.g, voxIndicator.accent.b, 0.42)
+
+            Text {
+              anchors.centerIn: parent
+              text: voxIndicator.transcribing ? "󰦨" : voxIndicator.unavailable ? "" : ""
+              color: voxIndicator.accent
+              font.family: voxIndicator.fontFamily
+              font.pixelSize: 18
+            }
+          }
+
+          Column {
+            width: parent.width - 54
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+
+            Text {
+              width: parent.width
+              text: voxIndicator.titleForStatus()
+              color: colors.textStrong
+              font.family: voxIndicator.fontFamily
+              font.pixelSize: 15
+              font.bold: true
+              elide: Text.ElideRight
+            }
+
+            Text {
+              width: parent.width
+              text: voxIndicator.detailForStatus()
+              color: colors.text
+              font.family: voxIndicator.fontFamily
+              font.pixelSize: 11
+              elide: Text.ElideRight
+            }
+          }
+        }
+
+        Row {
+          width: parent.width
+          spacing: 8
+
+          Rectangle {
+            width: 92
+            height: 46
+            radius: 14
+            color: colors.surfaceHover
+
+            Column {
+              anchors.centerIn: parent
+              spacing: 3
+              Text { anchors.horizontalCenter: parent.horizontalCenter; text: "modele"; color: colors.muted; font.family: voxIndicator.fontFamily; font.pixelSize: 9 }
+              Text { anchors.horizontalCenter: parent.horizontalCenter; text: voxIndicator.fieldValue(status.model, "local"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            }
+          }
+
+          Rectangle {
+            width: 92
+            height: 46
+            radius: 14
+            color: colors.surfaceHover
+
+            Column {
+              anchors.centerIn: parent
+              spacing: 3
+              Text { anchors.horizontalCenter: parent.horizontalCenter; text: "moteur"; color: colors.muted; font.family: voxIndicator.fontFamily; font.pixelSize: 9 }
+              Text { anchors.horizontalCenter: parent.horizontalCenter; text: voxIndicator.fieldValue(status.engine || status.backend, "whisper"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            }
+          }
+
+          Rectangle {
+            width: 92
+            height: 46
+            radius: 14
+            color: colors.surfaceHover
+
+            Column {
+              anchors.centerIn: parent
+              spacing: 3
+              Text { anchors.horizontalCenter: parent.horizontalCenter; text: "hotkey"; color: colors.muted; font.family: voxIndicator.fontFamily; font.pixelSize: 9 }
+              Text { anchors.horizontalCenter: parent.horizontalCenter; text: voxIndicator.fieldValue(status.hotkey, "Super+Alt+V"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 10; font.bold: true }
+            }
+          }
+        }
+
+        Row {
+          width: parent.width
+          spacing: 8
+
+          Rectangle {
+            width: 92
+            height: 34
+            radius: 999
+            color: Qt.rgba(colors.primary.r, colors.primary.g, colors.primary.b, 0.16)
+            border.width: 1
+            border.color: Qt.rgba(colors.primary.r, colors.primary.g, colors.primary.b, 0.36)
+
+            Text { anchors.centerIn: parent; text: "setup"; color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["sh", "-c", "ghostty --class=com.mitchellh.ghostty.voxtype -e bash -lc \"arch-setup-voxtype; read -n1 -r -p 'Press any key to close'\""]) }
+          }
+
+          Rectangle {
+            width: 92
+            height: 34
+            radius: 999
+            color: Qt.rgba(colors.tertiary.r, colors.tertiary.g, colors.tertiary.b, 0.16)
+            border.width: 1
+            border.color: Qt.rgba(colors.tertiary.r, colors.tertiary.g, colors.tertiary.b, 0.36)
+
+            Text { anchors.centerIn: parent; text: "restart"; color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["sh", "-c", "systemctl --user restart voxtype.service 2>/dev/null || true"]) }
+          }
+
+          Rectangle {
+            width: 92
+            height: 34
+            radius: 999
+            color: Qt.rgba(colors.secondary.r, colors.secondary.g, colors.secondary.b, 0.16)
+            border.width: 1
+            border.color: Qt.rgba(colors.secondary.r, colors.secondary.g, colors.secondary.b, 0.36)
+
+            Text { anchors.centerIn: parent; text: "logs"; color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["sh", "-c", "ghostty --class=com.mitchellh.ghostty.voxtype-logs -e bash -lc \"voxtype status --extended 2>/dev/null || true; printf '\\\\n--- journal ---\\\\n'; journalctl --user -u voxtype.service -n 80 --no-pager 2>/dev/null || true; read -n1 -r -p 'Press any key to close'\""]) }
+          }
+        }
+      }
+    }
   }
 }
