@@ -606,7 +606,7 @@ restart_session_components() {
   if command -v quickshell >/dev/null 2>&1; then
     pkill -x quickshell >/dev/null 2>&1 || true
     sleep 1
-    quickshell -c "$HOME/.config/quickshell/shell.qml" >/tmp/arch-config-quickshell.log 2>&1 &
+    quickshell --path "$HOME/.config/quickshell/shell.qml" >/tmp/arch-config-quickshell.log 2>&1 &
   fi
 
   if command -v swaync >/dev/null 2>&1; then

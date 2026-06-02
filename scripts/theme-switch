@@ -153,7 +153,7 @@ restart_themed_components() {
   if command -v quickshell >/dev/null 2>&1; then
     pkill -x quickshell >/dev/null 2>&1 || true
     sleep 1
-    quickshell -c "$config_home/quickshell/shell.qml" >/tmp/arch-config-quickshell.log 2>&1 &
+    quickshell --path "$config_home/quickshell/shell.qml" >/tmp/arch-config-quickshell.log 2>&1 &
   fi
 
   if command -v swaync >/dev/null 2>&1; then

@@ -1,4 +1,4 @@
-import QtQml
+import QtQuick
 
 QtObject {
   property color bg: "#db2e3440"
@@ -9,9 +9,9 @@ QtObject {
   property color textStrong: "#eceff4"
   property color muted: "#4c566a"
   property color primary: "#81a1c1"
-  property color onPrimary: "#2e3440"
+  property color primaryText: "#2e3440"
   property color secondary: "#88c0d0"
   property color tertiary: "#b48ead"
   property color error: "#bf616a"
-  property color onError: "#2e3440"
+  property color errorText: "#2e3440"
 }

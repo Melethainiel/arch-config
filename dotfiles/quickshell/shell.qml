@@ -35,16 +35,18 @@ ShellRoot {
 
   Theme { id: theme }
 
-  component CommandPoller: QtObject {
+  component CommandPoller: Item {
     id: poller
 
     property var command: []
     property int interval: 1000
     property string text: ""
 
+    visible: false
+
     function refresh() {
       if (!process.running)
-        process.exec()
+        process.exec(poller.command)
     }
 
     Component.onCompleted: refresh()
@@ -106,32 +108,98 @@ ShellRoot {
     }
   }
 
+  component IconTextBubble: Rectangle {
+    id: iconTextBubble
+
+    property string icon: ""
+    property string label: ""
+    property color iconColor: theme.text
+    property color labelColor: theme.text
+    property var command: []
+    property string shellCommand: ""
+    property int horizontalPadding: 12
+    property int minWidth: 0
+
+    implicitWidth: Math.max(minWidth, iconTextRow.implicitWidth + horizontalPadding * 2)
+    implicitHeight: 34
+    radius: 999
+    color: theme.bg
+
+    Row {
+      id: iconTextRow
+      anchors.centerIn: parent
+      spacing: 6
+
+      Text {
+        text: iconTextBubble.icon
+        color: iconTextBubble.iconColor
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: 13
+        verticalAlignment: Text.AlignVCenter
+      }
+
+      Text {
+        text: iconTextBubble.label
+        color: iconTextBubble.labelColor
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: 13
+        verticalAlignment: Text.AlignVCenter
+      }
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      cursorShape: iconTextBubble.shellCommand.length > 0 || iconTextBubble.command.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+      onClicked: {
+        if (iconTextBubble.shellCommand.length > 0)
+          root.runShell(iconTextBubble.shellCommand)
+        else if (iconTextBubble.command.length > 0)
+          root.run(iconTextBubble.command)
+      }
+    }
+  }
+
   component WorkspaceButton: Rectangle {
     id: workspaceButton
 
     required property int workspaceId
     required property string workspaceLabel
     property bool active: activeWorkspace.text === String(workspaceId)
+    property string workspaceIcon: workspaceLabel.indexOf(" ") > 0 ? workspaceLabel.split(" ")[0] : ""
+    property string workspaceText: workspaceLabel.indexOf(" ") > 0 ? workspaceLabel.split(" ").slice(1).join(" ") : workspaceLabel
 
-    Layout.preferredWidth: active ? 44 : 34
+    Layout.preferredWidth: active ? 50 : 40
     Layout.preferredHeight: 34
     radius: 999
     color: "transparent"
 
     Rectangle {
       anchors.centerIn: parent
-      width: parent.active ? 44 : 28
+      width: parent.active ? 44 : 34
       height: 20
       radius: 999
       color: parent.active ? theme.primary : theme.surfaceDim
 
-      Text {
+      Row {
         anchors.centerIn: parent
-        text: workspaceButton.workspaceLabel
-        color: workspaceButton.active ? theme.onPrimary : theme.muted
-        font.family: "JetBrainsMono Nerd Font, Font Awesome 6 Free, Noto Sans"
-        font.pixelSize: 13
-        verticalAlignment: Text.AlignVCenter
+        spacing: 3
+
+        Text {
+          visible: workspaceButton.workspaceIcon.length > 0
+          text: workspaceButton.workspaceIcon
+          color: workspaceButton.active ? theme.primaryText : theme.muted
+          font.family: "JetBrainsMono Nerd Font"
+          font.pixelSize: 13
+          verticalAlignment: Text.AlignVCenter
+        }
+
+        Text {
+          text: workspaceButton.workspaceText
+          color: workspaceButton.active ? theme.primaryText : theme.muted
+          font.family: "JetBrainsMono Nerd Font"
+          font.pixelSize: 13
+          verticalAlignment: Text.AlignVCenter
+        }
       }
     }
 
@@ -244,7 +312,7 @@ ShellRoot {
   CommandPoller {
     id: battery
     interval: 5000
-    command: ["sh", "-c", "dev=$(upower -e 2>/dev/null | grep -m1 battery || true); if [ -n \"$dev\" ]; then pct=$(upower -i \"$dev\" | sed -n 's/^[[:space:]]*percentage:[[:space:]]*//p' | head -n1); state=$(upower -i \"$dev\" | sed -n 's/^[[:space:]]*state:[[:space:]]*//p' | head -n1); [ -z \"$pct\" ] && exit 0; case \"$state\" in charging) icon= ;; fully-charged) icon= ;; discharging) icon= ;; *) icon= ;; esac; printf '%s %s' \"$icon\" \"$pct\"; fi"]
+    command: ["sh", "-c", "for dev in $(upower -e 2>/dev/null | grep battery); do info=$(upower -i \"$dev\"); printf '%s' \"$info\" | grep -q '^[[:space:]]*power supply:[[:space:]]*yes' || continue; pct=$(printf '%s' \"$info\" | sed -n 's/^[[:space:]]*percentage:[[:space:]]*//p' | head -n1); state=$(printf '%s' \"$info\" | sed -n 's/^[[:space:]]*state:[[:space:]]*//p' | head -n1); [ -z \"$pct\" ] && continue; case \"$state\" in charging) icon= ;; fully-charged) icon= ;; discharging) icon= ;; *) icon= ;; esac; printf '%s|%s' \"$icon\" \"$pct\"; break; done"]
   }
 
   CommandPoller {
@@ -303,7 +371,7 @@ ShellRoot {
           }
 
           ActionBubble {
-            visible: mediaStatus.text !== "Stopped"
+            visible: mediaStatus.text === "Playing"
             minWidth: 260
             horizontalPadding: 10
             label: (mediaStatus.text === "Playing" ? "⏸  " : "▶  ") + mediaTitle.text
@@ -355,24 +423,28 @@ ShellRoot {
 
           TrayBubble { parentWindow: barWindow }
 
-          ActionBubble {
+          IconTextBubble {
             visible: volume.text.length > 0
-            label: " " + volume.text
+            icon: ""
+            label: volume.text
             shellCommand: "ghostty --class=com.mitchellh.ghostty.wiremix -e wiremix"
           }
 
-          ActionBubble {
-            label: network.text === "ETH" ? "󰈀 ethernet" : network.text === "OFF" || network.text.length === 0 ? " off" : " " + network.text
+          IconTextBubble {
+            icon: network.text === "ETH" ? "󰈀" : ""
+            label: network.text === "ETH" ? "ethernet" : network.text === "OFF" || network.text.length === 0 ? "off" : network.text
             shellCommand: "ghostty --class=com.mitchellh.ghostty.impala -e impala"
           }
 
-          Bubble {
+          IconTextBubble {
             visible: battery.text.length > 0
-            label: battery.text
+            icon: battery.text.split("|")[0] || ""
+            label: battery.text.split("|")[1] || ""
           }
 
-          ActionBubble {
-            label: Number(notifications.text || "0") > 0 ? "󱅫 " + notifications.text : ""
+          IconTextBubble {
+            icon: Number(notifications.text || "0") > 0 ? "󱅫" : ""
+            label: Number(notifications.text || "0") > 0 ? notifications.text : ""
             shellCommand: "swaync-client -t -sw"
           }
         }
