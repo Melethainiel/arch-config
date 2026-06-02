@@ -110,7 +110,7 @@ Rectangle {
 
     anchor.window: weatherPopup.parentWindow
     anchor.rect.x: Math.round(weatherBubble.mapToItem(null, 0, 0).x + weatherBubble.width / 2 - implicitWidth / 2 + 112)
-    anchor.rect.y: Math.round(weatherBubble.mapToItem(null, 0, 0).y + 42)
+    anchor.rect.y: Math.round(weatherBubble.mapToItem(null, 0, 0).y + 52)
 
     onVisibleChanged: {
       if (!visible)

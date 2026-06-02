@@ -150,13 +150,13 @@ Rectangle {
 
     visible: voxIndicator.open
     implicitWidth: 328
-    implicitHeight: 192
+    implicitHeight: 216
     color: "transparent"
     grabFocus: true
 
     anchor.window: voxIndicator.parentWindow
     anchor.rect.x: Math.round(voxBubble.mapToItem(null, 0, 0).x - 18)
-    anchor.rect.y: Math.round(voxBubble.mapToItem(null, 0, 0).y + 42)
+    anchor.rect.y: Math.round(voxBubble.mapToItem(null, 0, 0).y + 52)
 
     onVisibleChanged: {
       if (!visible)
@@ -232,12 +232,20 @@ Rectangle {
             height: 46
             radius: 14
             color: colors.surfaceHover
+            clip: true
 
-            Column {
-              anchors.centerIn: parent
-              spacing: 3
-              Text { anchors.horizontalCenter: parent.horizontalCenter; text: "modele"; color: colors.muted; font.family: voxIndicator.fontFamily; font.pixelSize: 9 }
-              Text { anchors.horizontalCenter: parent.horizontalCenter; text: voxIndicator.fieldValue(status.model, "local"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            Item {
+              anchors.fill: parent
+
+              Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - 16
+                spacing: 2
+
+                Text { width: parent.width; height: 12; text: "modele"; color: colors.text; opacity: 0.74; font.family: voxIndicator.fontFamily; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; lineHeightMode: Text.FixedHeight; lineHeight: 12 }
+                Text { width: parent.width; height: 14; text: voxIndicator.fieldValue(status.model, "local"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; lineHeightMode: Text.FixedHeight; lineHeight: 14 }
+              }
             }
           }
 
@@ -246,12 +254,20 @@ Rectangle {
             height: 46
             radius: 14
             color: colors.surfaceHover
+            clip: true
 
-            Column {
-              anchors.centerIn: parent
-              spacing: 3
-              Text { anchors.horizontalCenter: parent.horizontalCenter; text: "moteur"; color: colors.muted; font.family: voxIndicator.fontFamily; font.pixelSize: 9 }
-              Text { anchors.horizontalCenter: parent.horizontalCenter; text: voxIndicator.fieldValue(status.engine || status.backend, "whisper"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
+            Item {
+              anchors.fill: parent
+
+              Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - 16
+                spacing: 2
+
+                Text { width: parent.width; height: 12; text: "moteur"; color: colors.text; opacity: 0.74; font.family: voxIndicator.fontFamily; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; lineHeightMode: Text.FixedHeight; lineHeight: 12 }
+                Text { width: parent.width; height: 14; text: voxIndicator.fieldValue(status.engine || status.backend, "whisper"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; lineHeightMode: Text.FixedHeight; lineHeight: 14 }
+              }
             }
           }
 
@@ -260,12 +276,20 @@ Rectangle {
             height: 46
             radius: 14
             color: colors.surfaceHover
+            clip: true
 
-            Column {
-              anchors.centerIn: parent
-              spacing: 3
-              Text { anchors.horizontalCenter: parent.horizontalCenter; text: "hotkey"; color: colors.muted; font.family: voxIndicator.fontFamily; font.pixelSize: 9 }
-              Text { anchors.horizontalCenter: parent.horizontalCenter; text: voxIndicator.fieldValue(status.hotkey, "Super+Alt+V"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 10; font.bold: true }
+            Item {
+              anchors.fill: parent
+
+              Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - 16
+                spacing: 2
+
+                Text { width: parent.width; height: 12; text: "hotkey"; color: colors.text; opacity: 0.74; font.family: voxIndicator.fontFamily; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; lineHeightMode: Text.FixedHeight; lineHeight: 12 }
+                Text { width: parent.width; height: 14; text: voxIndicator.fieldValue(status.hotkey, "Super+V"); color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 10; font.bold: true; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight; lineHeightMode: Text.FixedHeight; lineHeight: 14 }
+              }
             }
           }
         }
@@ -283,7 +307,7 @@ Rectangle {
             border.color: Qt.rgba(colors.primary.r, colors.primary.g, colors.primary.b, 0.36)
 
             Text { anchors.centerIn: parent; text: "setup"; color: colors.textStrong; font.family: voxIndicator.fontFamily; font.pixelSize: 11; font.bold: true }
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["sh", "-c", "ghostty --class=com.mitchellh.ghostty.voxtype -e bash -lc \"arch-setup-voxtype; read -n1 -r -p 'Press any key to close'\""]) }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Quickshell.execDetached(["sh", "-c", "ghostty --class=com.mitchellh.ghostty.voxtype -e bash -lc \"voxtype configure; read -n1 -r -p 'Press any key to close'\""]) }
           }
 
           Rectangle {
