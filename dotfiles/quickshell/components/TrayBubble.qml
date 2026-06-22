@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
@@ -7,6 +8,7 @@ Rectangle {
 
   required property var colors
   property var parentWindow
+  property string fontFamily: "JetBrainsMono Nerd Font"
 
   implicitHeight: 34
   implicitWidth: trayRow.implicitWidth + 16
@@ -32,6 +34,20 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
 
+        // Menu contextuel DBus rendu via TrayMenu (PopupWindow personnalisée),
+        // thématique colors.surface / colors.text au lieu du QMenu Qt natif.
+        // anchor.item laisse Quickshell calculer le rect d'ancrage depuis
+        // l'item lui-même, plus fiable qu'un mapToItem(null, ...) dans un
+        // contexte Variants multi-écran.
+        TrayMenu {
+          id: ctxMenu
+          colors: trayBubble.colors
+          fontFamily: trayBubble.fontFamily
+          parentWindow: trayBubble.parentWindow
+          menuHandle: trayItem.modelData.menu
+          anchorItem: trayItem
+        }
+
         Rectangle {
           anchors.fill: parent
           radius: 999
@@ -44,15 +60,31 @@ Rectangle {
           implicitSize: 16
         }
 
+        // Bascule le menu contextuel si l'item expose un menu DBus non null.
+        // Garde le contrôle centralisé pour éviter la duplication entre clic
+        // droit et clic gauche sur les items "onlyMenu".
+        function toggleMenu() {
+          if (!ctxMenu.menuHandle) return
+          ctxMenu.open = !ctxMenu.open
+        }
+
         onClicked: function(mouse) {
-          if (mouse.button === Qt.RightButton && modelData.hasMenu)
-            modelData.display(trayBubble.parentWindow, x, y + height)
-          else if (mouse.button === Qt.MiddleButton)
-            modelData.secondaryActivate()
-          else if (modelData.onlyMenu && modelData.hasMenu)
-            modelData.display(trayBubble.parentWindow, x, y + height)
-          else
-            modelData.activate()
+          // Clic droit → menu contextuel (la plupart des apps SNI l'exposent).
+          if (mouse.button === Qt.RightButton) {
+            toggleMenu()
+            return
+          }
+
+          // Clic milieu → action secondaire DBus (ex. "SecondaryActivate").
+          if (mouse.button === Qt.MiddleButton) {
+            trayItem.modelData.secondaryActivate()
+            return
+          }
+
+          // Clic gauche → menu pour les items "onlyMenu" (ex. pure popups),
+          // sinon action principale DBus (Activate).
+          if (trayItem.modelData.onlyMenu) toggleMenu()
+          else trayItem.modelData.activate()
         }
       }
     }

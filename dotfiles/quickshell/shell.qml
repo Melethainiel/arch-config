@@ -1,3 +1,4 @@
+//@ pragma UseQApplication
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -178,11 +179,11 @@ ShellRoot {
           anchors.horizontalCenter: parent.horizontalCenter
           spacing: 8
 
-          Bubble {
+          CalendarPopup {
             colors: theme
+            parentWindow: barWindow
             fontFamily: root.fontFamily
-            label: clock.date.toLocaleString(Qt.locale("fr_FR"), "ddd HH:mm")
-            bold: true
+            clockRef: clock
           }
 
           Rectangle {
